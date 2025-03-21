@@ -6,11 +6,11 @@ from .shares import sample_shares
 def maxent_disagg(
     n: int,
     mean_0: float,
+    shares: np.ndarray | list,
     sd_0: float = None,
     min_0: float = 0,
     max_0: float = np.inf,
-    shares: np.ndarray = None,
-    sds: np.ndarray = None,
+    sds: np.ndarray | list = None,
 ) -> np.ndarray:
     
     """
@@ -27,14 +27,14 @@ def maxent_disagg(
         The number of samples to generate.
     mean_0:
         The best guess of the aggregate value.
+    shares:
+        The best guesses for the shares. The sum of the shares should be 1 (unless there are NA's).
     sd_0:
         The standard deviation of the aggregate value.
     min:
         The lower boundary of the aggregate value.
     max:
         The upper boundary of the aggregate value.
-    shares:
-        The best guesses for the shares. The sum of the shares should be 1 (unless there are NA's).
     sds:
         The standard deviations of the shares. Set to None if not available.
 
@@ -43,7 +43,33 @@ def maxent_disagg(
     sample_disagg : np.ndarray
         A 2D array of shape (n, len(shares)) containing the generated samples.
     """
-    
+
+
+    # Check if shares and sds are numpy arrays or lists
+    if type(shares) != np.ndarray:
+        if type(shares) == list:
+            shares = np.array(shares)
+        else:
+            raise ValueError('Shares should be a numpy array or a list.')
+    if type(sds) != np.ndarray and sds is not None:
+        if type(sds) == list:
+            sds = np.array(sds)
+        else:
+            raise ValueError('Sds should be a numpy array or a list.')
+        
+    # check shares contain at least one non-NA value
+    if np.all(np.isnan(shares)):
+        raise ValueError('Shares should contain at least one non-NA value.')
+    # check shares sum to 1
+    elif not np.any(np.isnan(shares)):
+        if not np.isclose(np.sum(shares), 1):
+            raise ValueError('Shares should sum to 1 unless there are NA values.')
+    # check shares and sds have the same length
+    if sds is not None:
+        if len(shares) != len(sds):
+            raise ValueError('Shares and sds should have the same length.')
+
+        
     # The code below is only necessary if we want to accept arrays as input
     # if sd_0 is not None:
     #     if not type(mean_0)==type(sd_0)==type(min)==type(max):

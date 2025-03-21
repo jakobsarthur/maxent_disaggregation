@@ -69,4 +69,4 @@ def find_gamma_maxent2(shares, eval_f=dirichlet_entropy, x0=1, x0_n_tries=100, b
         opt.set_local_optimizer(local_opt)
 
     res = opt.optimize([x0])
-    return res
+    return res[0]

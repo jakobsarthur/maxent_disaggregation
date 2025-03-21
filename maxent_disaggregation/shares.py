@@ -10,8 +10,8 @@ def rdir1(n, length, names=None):
     return sample
 
 def rdirg(n, shares, sds):
-    if not np.array_equal(list(shares.keys()), list(sds.keys())):
-        raise ValueError('shares and sds need to have the same column names. can also be both NULL')
+    # if not np.array_equal(list(shares.keys()), list(sds.keys())):
+    #     raise ValueError('shares and sds need to have the same column names. can also be both NULL')
 
     alpha2 = (shares / sds) ** 2
     beta2 = shares / (sds) ** 2
@@ -20,12 +20,12 @@ def rdirg(n, shares, sds):
     for i in range(k):
         x[:, i] = gamma.rvs(alpha2[i], scale=1/beta2[i], size=n)
     sample = x / x.sum(axis=1, keepdims=True)
-    return sample
+    return sample, None
 
-def rdir_maxent(n, shares, find_gamma_maxent2, dirichlet_entropy, **kwargs):
-    out = find_gamma_maxent2(shares, eval_f=dirichlet_entropy, **kwargs)
-    sample = dirichlet.rvs(shares * out['solution'], size=n)
-    return sample, out['solution']
+def rdir_maxent(n, shares, **kwargs):
+    gamma= find_gamma_maxent2(shares, eval_f=dirichlet_entropy, **kwargs)
+    sample = dirichlet.rvs(shares * gamma, size=n)
+    return sample, gamma
 
 def rdir(n, shares, gamma, threshold=1E-2):
     alpha = gamma * shares
@@ -67,7 +67,7 @@ def sample_shares(n, shares, sds=None, na_action='fill', max_iter=1E3, **kwargs)
     have_both = np.isfinite(shares) & np.isfinite(sds)
 
     if np.all(have_both):
-        sample = rdirg(n, shares, sds)
+        sample, gamma = rdirg(n, shares, sds)
     elif np.all(have_mean_only):
         sample, gamma = rdir_maxent(n, shares, **kwargs)
     else:
