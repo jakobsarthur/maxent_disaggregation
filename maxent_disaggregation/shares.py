@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import dirichlet, gamma
-from .maxent_dirichlet import find_gamma_maxent2, dirichlet_entropy
+from .maxent_direchlet import find_gamma_maxent2, dirichlet_entropy
 
 def rdir1(n, length, names=None):
     sample = dirichlet.rvs([1] * length, size=n)
