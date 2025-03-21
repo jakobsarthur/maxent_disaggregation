@@ -25,7 +25,7 @@ def rdirg(n, shares, sds):
 def rdir_maxent(n, shares, find_gamma_maxent2, dirichlet_entropy, **kwargs):
     out = find_gamma_maxent2(shares, eval_f=dirichlet_entropy, **kwargs)
     sample = dirichlet.rvs(shares * out['solution'], size=n)
-    return sample
+    return sample, out['solution']
 
 def rdir(n, shares, gamma, threshold=1E-2):
     alpha = gamma * shares
@@ -69,16 +69,16 @@ def sample_shares(n, shares, sds=None, na_action='fill', max_iter=1E3, **kwargs)
     if np.all(have_both):
         sample = rdirg(n, shares, sds)
     elif np.all(have_mean_only):
-        sample = rdir_maxent(n, shares, **kwargs)
+        sample, gamma = rdir_maxent(n, shares, **kwargs)
     else:
         sample = np.zeros((n, K))
         if np.sum(have_both) > 0:
             sample[:, have_both] = rbeta3(n, shares[have_both], sds[have_both], max_iter=max_iter)
         if np.sum(have_mean_only) > 0:
             alpha2 = shares[have_mean_only] / np.sum(shares[have_mean_only])
-            sample_temp = rdir_maxent(n, alpha2, **kwargs)
+            sample_temp, gamma = rdir_maxent(n, alpha2, **kwargs)
             sample[:, have_mean_only] = sample_temp * (1 - sample.sum(axis=1, keepdims=True))
-    return sample
+    return sample, gamma
 
 def rbeta3(n, shares, sds, fix=True, max_iter=1E3):
     var = sds ** 2

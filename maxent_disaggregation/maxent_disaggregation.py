@@ -53,9 +53,9 @@ def maxent_disagg(
     #         raise ValueError('All arguments should be of the same type.')
 
     samples_agg = sample_aggregate(n=n, mean=mean_0, sd=sd_0, min=min_0, max=max_0)
-    samples_shares = sample_shares(n=n, shares=shares, sds=sds)
+    samples_shares, gamma = sample_shares(n=n, shares=shares, sds=sds)
     sample_disagg = samples_shares * samples_agg[:, np.newaxis]
-    return sample_disagg
+    return sample_disagg, gamma
 
 
 def sample_aggregate(
