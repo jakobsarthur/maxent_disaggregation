@@ -104,11 +104,3 @@ def sample_aggregate(
     else:
         raise ValueError('Case not implemented atm.')
 
-
-def sample_shares(n, shares, sds=None):
-    if sds is None:
-        sds = np.zeros_like(shares)
-    samples = np.random.normal(loc=shares, scale=sds, size=(n, len(shares)))
-    samples = np.clip(samples, 0, 1)
-    samples /= samples.sum(axis=1, keepdims=True)
-    return samples
