@@ -7,11 +7,11 @@ import warnings
 def generalized_dirichlet(n, shares, sds):
     """
     Generate random samples from a Generalised Dirichlet distribution with given shares and standard deviations.
-    
+
     Reference:
     ----------------
     Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot. “Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks: The Case of Dissociative Recombinations.”
-    The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110. 
+    The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110.
     https://doi.org/10.1063/1.3479907.
 
     Parameters:
@@ -45,12 +45,7 @@ def dirichlet_max_ent(n, shares, **kwargs):
 
 
 def sample_shares(
-    n, shares, 
-    sds=None, 
-    na_action="fill", 
-    max_iter=1e3, 
-    grad_based=False, 
-    **kwargs
+    n, shares, sds=None, na_action="fill", max_iter=1e3, grad_based=False, **kwargs
 ):
     if sds is None:
         sds = np.full_like(shares, np.nan)
