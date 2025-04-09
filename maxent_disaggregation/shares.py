@@ -37,7 +37,25 @@ def generalized_dirichlet(n, shares, sds):
     return sample, None
 
 
-def dirichlet_max_ent(n, shares, **kwargs):
+def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
+    """
+    Generate samples from a Dirichlet distribution with maximum entropy.
+    This function computes the gamma parameter that maximizes the entropy
+    of the Dirichlet distribution given the input shares. It then generates
+    `n` samples from the resulting Dirichlet distribution.
+    Parameters:
+        n (int): The number of samples to generate.
+        shares (array-like): The input shares (probabilities) that define
+            the Dirichlet distribution.
+        **kwargs: Additional keyword arguments passed to the `find_gamma_maxent`
+            function.
+    Returns:
+        tuple: A tuple containing:
+            - sample (ndarray): An array of shape (n, len(shares)) containing
+              the generated samples.
+            - gamma_par (float): The computed gamma parameter that maximizes
+              the entropy of the Dirichlet distribution.
+    """
 
     gamma_par = find_gamma_maxent(shares, eval_f=dirichlet_entropy, **kwargs)
     sample = dirichlet.rvs(shares * gamma_par, size=n)
@@ -45,8 +63,43 @@ def dirichlet_max_ent(n, shares, **kwargs):
 
 
 def sample_shares(
-    n, shares, sds=None, na_action="fill", max_iter=1e3, grad_based=False, **kwargs
+    n: int, shares: np.ndarray | list, sds: np.ndarray | list = None, na_action="fill", max_iter=1e3, grad_based=False, **kwargs
 ):
+    """
+    Samples shares from a distribution based on the provided mean and standard deviations.
+    Parameters:
+        -----------
+        n (int): The number of samples to generate.
+        shares (np.ndarray | list): The mean values of the shares. Must sum to 1 unless `na_action` is set to "fill".
+        sds (np.ndarray | list, optional): The standard deviations of the shares. Defaults to None.
+        na_action (str, optional): Action to take for missing values in `shares`. 
+            Options are:
+            - "remove": Remove missing values.
+            - "fill": Fill missing values such that the shares sum to 1.
+            Defaults to "fill".
+        max_iter (float, optional): Maximum number of iterations for sampling algorithms. Defaults to 1e3.
+        grad_based (bool, optional): Whether to use gradient-based optimization for entropy maximization. Defaults to False.
+        **kwargs: Additional arguments passed to underlying sampling functions.
+    Returns:
+        -----------
+        - tuple:
+            - sample (np.ndarray): An array of shape (n, K) containing the sampled shares.
+            - gamma (np.ndarray): Parameters of the distribution used for sampling, if applicable.
+    Raises:
+        -----------
+        - ValueError: If `na_action` is not "remove" or "fill".
+        - ValueError: If `shares` do not sum to 1 after handling missing values.
+    Warnings:
+        -----------
+        - UserWarning: If standard deviations are provided for shares without a mean estimate. These will be treated as missing values and removed.
+    Notes:
+        -----------
+        - The function handles different cases based on the availability of mean and standard deviation values.
+        - If both mean and standard deviation are provided for all shares, a generalized Dirichlet distribution is used.
+        - If only mean values are provided, a maximum entropy Dirichlet distribution is used.
+        - If a mix of mean and standard deviation availability exists, the function handles uses a nested approach.
+    """
+
     if sds is None:
         sds = np.full_like(shares, np.nan)
 
