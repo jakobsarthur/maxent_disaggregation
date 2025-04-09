@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import dirichlet, gamma
-from .maxent_direchlet import find_gamma_maxent2, dirichlet_entropy
+from .maxent_direchlet import find_gamma_maxent, dirichlet_entropy
 import warnings
 
 
@@ -39,7 +39,7 @@ def generalized_dirichlet(n, shares, sds):
 
 def dirichlet_max_ent(n, shares, **kwargs):
 
-    gamma_par = find_gamma_maxent2(shares, eval_f=dirichlet_entropy, **kwargs)
+    gamma_par = find_gamma_maxent(shares, eval_f=dirichlet_entropy, **kwargs)
     sample = dirichlet.rvs(shares * gamma_par, size=n)
     return sample, gamma_par
 

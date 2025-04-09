@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import gamma, digamma, polygamma, psi
+from scipy.special import polygamma, psi
 from scipy.stats import dirichlet
 import nlopt
 
@@ -10,11 +10,11 @@ def dirichlet_entropy_derivative(gamma_par, shares):
     with respect to scaling parameter x, assuming alpha = x * shares.
 
     Parameters:
-    - x: scalar multiplier
-    - shares: list or numpy array of fixed Dirichlet parameters
+    - gamma_par [float]: concentration paramter for Dirichlet distribution
+    - shares: list or numpy array of shares (proportions) that sum to 1
 
     Returns:
-    - derivative of entropy with respect to x
+    - derivative of entropy with respect to gamma_par
     """
     print("Entropy derative funtion being used!")
     alpha = gamma_par * np.array(shares)
@@ -27,11 +27,10 @@ def dirichlet_entropy_derivative(gamma_par, shares):
     derivative = 0
     for j in range(k):
         a_j = alpha[j]
-        a_fix_j = shares[j]
-        dH_dx_j = a_fix_j * (
+        dHdx_j = shares[j] * (
             term1 + (sum_alpha - k) * term2 - psi(a_j) - (a_j - 1) * polygamma(1, a_j)
         )
-        derivative += dH_dx_j
+        derivative += dHdx_j
 
     return derivative
 
@@ -56,16 +55,67 @@ def dirichlet_entropy(gamma_par, shares):
     return -dirichlet.entropy(alpha)
 
 
-def find_gamma_maxent2(
-    shares,
-    eval_f=dirichlet_entropy,
-    x0=1,
-    x0_n_tries=100,
-    bounds=(0.001, 172),
-    shares_lb=0,
-    eval_grad_f=dirichlet_entropy_derivative,
-    grad_based=False,
-):
+def find_gamma_maxent(
+    shares: np.ndarray | list = None,
+    eval_f: function =dirichlet_entropy,
+    x0: float = 1,
+    x0_n_tries: int = 100,
+    bounds: tuple = (0.001, 172),
+    shares_lb: float = 0,
+    eval_grad_f: function = dirichlet_entropy_derivative,
+    grad_based: bool = False,
+) -> float:
+      """
+    Finds the gamma parameter that maximizes the entropy of a Dirichlet distribution 
+    given a set of shares. This function uses the NLopt library for optimization.
+    Parameters:
+    -----------
+    shares : array-like
+        A list or array of shares that must sum to 1. Shares below `shares_lb` 
+        are excluded from the computation.
+    eval_f : callable, optional
+        The function to evaluate the entropy of the Dirichlet distribution. 
+        Defaults to `dirichlet_entropy`.
+    x0 : float, optional
+        Initial guess for the gamma parameter. Defaults to 1.
+    x0_n_tries : int, optional
+        Number of attempts to find a valid initial value for `x0` if the 
+        evaluation function returns non-finite values. Defaults to 100.
+    bounds : tuple, optional
+        A tuple specifying the lower and upper bounds for the gamma parameter. 
+        Defaults to (0.001, 172).
+    shares_lb : float, optional
+        Lower bound for the shares. Shares below this value are excluded. 
+        Defaults to 0.
+    eval_grad_f : callable, optional
+        The function to evaluate the gradient of the entropy function. 
+        Defaults to `dirichlet_entropy_derivative`.
+    grad_based : bool, optional
+        If True, uses gradient-based optimization. Defaults to False.
+    Returns:
+    --------
+    float
+        The optimized gamma parameter that maximizes the entropy.
+    Raises:
+    -------
+    ValueError
+        If the shares do not sum to 1 or if a valid initial value for `x0` 
+        cannot be found after `x0_n_tries` attempts.
+    Notes:
+    ------
+    - If the optimization fails to find a valid initial value for `x0`, the 
+      function provides suggestions to adjust parameters such as `shares_lb`, 
+      `x0_n_tries`, or `bounds`.
+    - The optimization process can be made gradient-based by setting 
+      `grad_based=True`.
+    Example:
+    --------
+    >>> shares = np.array([0.2, 0.3, 0.5])
+    >>> gamma = find_gamma_maxent(shares)
+    >>> print(gamma)
+    """
+      
+
     if not np.isclose(np.sum(shares), 1):
         raise ValueError(
             f"Shares must sum to 1. But `sum(shares)` gives {np.sum(shares)}"
