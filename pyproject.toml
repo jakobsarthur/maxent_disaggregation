@@ -10,7 +10,7 @@ authors = [
 maintainers = [
   { name="Arthur Jakob", email="artos.jakobs@psi.ch" }
 ]
-description = "Package to help with the propagation of uncertainty when disaggregating data, uunsing the maximum entropy principle."
+description = "Package to help with the propagation of uncertainty when disaggregating data, using the maximum entropy principle."
 readme = "README.md"
 dynamic = ["version"]
 # Add here all kinds of additional classifiers as defined under
