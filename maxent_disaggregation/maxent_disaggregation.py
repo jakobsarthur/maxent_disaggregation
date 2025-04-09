@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.stats import truncnorm
+from scipy.stats import truncnorm, lognorm
 from .shares import sample_shares
+import warnings
 
 
 def maxent_disagg(
@@ -11,6 +12,10 @@ def maxent_disagg(
     min_0: float = 0,
     max_0: float = np.inf,
     sds: np.ndarray | list = None,
+    log: bool = False,
+    grad_based: bool = False,
+    na_action: str = "fill",
+    max_iter: int = 1e3,
 ) -> np.ndarray:
     
     """
@@ -78,8 +83,11 @@ def maxent_disagg(
     #     if not type(mean_0)==type(min)==type(max):
     #         raise ValueError('All arguments should be of the same type.')
 
-    samples_agg = sample_aggregate(n=n, mean=mean_0, sd=sd_0, min=min_0, max=max_0)
-    samples_shares, gamma = sample_shares(n=n, shares=shares, sds=sds)
+    samples_agg = sample_aggregate(n=n, mean=mean_0, sd=sd_0, low_bound=min_0, high_bound=max_0, log=log)
+    samples_shares, gamma = sample_shares(n=n, shares=shares, sds=sds, grad_based=grad_based, na_action=na_action, max_iter=max_iter)
+    # Check if the shares sum to 1
+    if not np.isclose(np.sum(samples_shares, axis=1), 1).all():
+        raise ValueError('Shares do not sum to 1! Check your shares and sds.')
     sample_disagg = samples_shares * samples_agg[:, np.newaxis]
     return sample_disagg, gamma
 
@@ -88,8 +96,9 @@ def sample_aggregate(
     n: int,
     mean: float,
     sd: float = None,
-    min: float = 0,
-    max: float = np.inf,
+    low_bound: float = 0,
+    high_bound: float = np.inf,
+    log: bool = False,
 ) -> np.ndarray:
     
     """
@@ -106,27 +115,40 @@ def sample_aggregate(
         The best guess of the aggregate value.
     sd:
         The standard deviation of the aggregate value.
-    min:
+    low_bound:
         The lower boundary of the aggregate value.
-    max:
+    high_bound:
         The upper boundary of the aggregate value.
     """
 
 
     
-    if mean is not None and sd is not None and min == -np.inf and max == np.inf:
+    if mean is not None and sd is not None and low_bound == -np.inf and high_bound == np.inf:
         # Normal distribution
         return np.random.normal(loc=mean, scale=sd, size=n)
     elif mean is not None and sd is not None:
-        # Truncated normal
-        a, b = (min - mean) / sd, (max - mean) / sd
-        return truncnorm.rvs(a, b, loc=mean, scale=sd, size=n)
-    elif mean is not None and sd is None and min == 0 and max == np.inf:
+        if log==False:
+            # Truncated normal
+            a, b = (low_bound - mean) / sd, (high_bound - mean) / sd
+            return truncnorm.rvs(a, b, loc=mean, scale=sd, size=n)
+        else:
+            # use lognormal
+            if low_bound < 0:
+                warnings.warn('You provided a negative lower bound but the lognormal distribution cannot be used with negative values. Setting low_bound to 0. Alternatively set log=False.')
+                low_bound = 0
+            if high_bound != np.inf:
+                warning('You provided a finite high bound, currently this not supported for the lognormal distribution. High bound is ignored. Alternatively set log=False.')
+            # Lognormal distribution
+            sigma = np.sqrt(np.log(1 + (sd / mean) ** 2))
+            mu = np.log(mean) - 0.5 * sigma**2
+            return lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
+
+    elif mean is not None and sd is None and low_bound == 0 and high_bound == np.inf:
         # Exponential
         return np.random.exponential(scale=mean, size=n)
-    elif mean is None and sd is None and np.isfinite(min) and np.isfinite(max):
+    elif mean is None and sd is None and np.isfinite(low_bound) and np.isfinite(high_bound):
         # Uniform
-        return np.random.uniform(low=min, high=max, size=n)
+        return np.random.uniform(low=low_bound, high=high_bound, size=n)
     else:
         raise ValueError('Case not implemented atm.')
 
