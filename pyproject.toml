@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "maxent_disaggregation"
 authors = [
-  { name="Arthur Jakob", email="artos.jakobs@psi.ch" }
+  { name="Arthur Jakobs", email="artos.jakobs@psi.ch" }
 ]
 maintainers = [
-  { name="Arthur Jakob", email="artos.jakobs@psi.ch" }
+  { name="Arthur Jakobs", email="artos.jakobs@psi.ch" }
 ]
 description = "Package to help with the propagation of uncertainty when disaggregating data, using the maximum entropy principle."
 readme = "README.md"
