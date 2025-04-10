@@ -17,6 +17,7 @@ def maxent_disagg(
     return_shares: bool = False,
     return_aggregate: bool = False,
     max_iter: int = 1e3,
+    **kwargs,
 ) -> np.ndarray:
     """
     Generate random disaggregates based on the maximum entropy principle.
@@ -90,6 +91,7 @@ def maxent_disagg(
         sds=sds,
         grad_based=grad_based,
         max_iter=max_iter,
+        **kwargs,
     )
     # Check if the shares sum to 1
     if not np.isclose(np.sum(samples_shares, axis=1), 1).all():
