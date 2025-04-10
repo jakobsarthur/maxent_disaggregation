@@ -63,89 +63,143 @@ def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
 
 
 def sample_shares(
-    n: int, shares: np.ndarray | list, sds: np.ndarray | list = None, na_action="fill", max_iter=1e3, grad_based=False, **kwargs
+    n: int, shares: np.ndarray | list, sds: np.ndarray | list = None, max_iter=1e3, grad_based=False, **kwargs
 ):
     """
-    Samples shares from a distribution based on the provided mean and standard deviations.
-    Parameters:
-        -----------
-        n (int): The number of samples to generate.
-        shares (np.ndarray | list): The mean values of the shares. Must sum to 1 unless `na_action` is set to "fill".
-        sds (np.ndarray | list, optional): The standard deviations of the shares. Defaults to None.
-        na_action (str, optional): Action to take for missing values in `shares`. 
-            Options are:
-            - "remove": Remove missing values.
-            - "fill": Fill missing values such that the shares sum to 1.
-            Defaults to "fill".
-        max_iter (float, optional): Maximum number of iterations for sampling algorithms. Defaults to 1e3.
-        grad_based (bool, optional): Whether to use gradient-based optimization for entropy maximization. Defaults to False.
-        **kwargs: Additional arguments passed to underlying sampling functions.
-    Returns:
-        -----------
-        - tuple:
-            - sample (np.ndarray): An array of shape (n, K) containing the sampled shares.
-            - gamma (np.ndarray): Parameters of the distribution used for sampling, if applicable.
-    Raises:
-        -----------
-        - ValueError: If `na_action` is not "remove" or "fill".
-        - ValueError: If `shares` do not sum to 1 after handling missing values.
-    Warnings:
-        -----------
-        - UserWarning: If standard deviations are provided for shares without a mean estimate. These will be treated as missing values and removed.
-    Notes:
-        -----------
-        - The function handles different cases based on the availability of mean and standard deviation values.
-        - If both mean and standard deviation are provided for all shares, a generalized Dirichlet distribution is used.
-        - If only mean values are provided, a maximum entropy Dirichlet distribution is used.
-        - If a mix of mean and standard deviation availability exists, the function handles uses a nested approach.
-    """
+    Samples from a distribution of shares based on given means and standard deviations.
 
+    This function generates samples of shares using either a generalized Dirichlet 
+    distribution, a maximum entropy Dirichlet distribution, or a combination of both, 
+    depending on the availability of mean and standard deviation inputs.
+
+    Parameters:
+    ----------
+    n : int
+        Number of samples to generate.
+    shares : np.ndarray | list
+        Array or list of mean values for the shares. These should sum to 1 if fully specified.
+    sds : np.ndarray | list, optional
+        Array or list of standard deviations for the shares. If not provided, defaults to NaN.
+    max_iter : float, optional
+        Maximum number of iterations for optimization algorithms. Default is 1e3.
+    grad_based : bool, optional
+        Whether to use gradient-based optimization for maximum entropy Dirichlet sampling. Default is False.
+    **kwargs : dict
+        Additional keyword arguments passed to the underlying sampling functions.
+
+    Returns:
+    -------
+    sample : np.ndarray
+        A 2D array of shape (n, K), where K is the number of shares, containing the sampled values.
+    gamma_par : np.ndarray
+        Parameters of the Dirichlet or generalized Dirichlet distribution used for sampling.
+
+    Notes:
+    -----
+    - If both means and standard deviations are provided for all shares, the generalized 
+      Dirichlet distribution is used.
+    - If only means are provided, the maximum entropy Dirichlet distribution is used.
+    - If a mix of known and unknown means/standard deviations is provided, a hierarchical 
+      approach is used to sample the shares.
+    - The function raises warnings if standard deviations are provided without corresponding 
+      mean values, as this is not recommended.
+
+    Raises:
+    ------
+    ValueError
+        If `na_action` is not "fill" or "remove".
+        If the shares do not sum to 1 and `na_action` is not set to "fill".
+    AssertionError
+        If the resulting sample shape does not match the expected dimensions.
+    """
     if sds is None:
         sds = np.full_like(shares, np.nan)
-
-    if na_action == "remove":
-        sds = sds[~np.isnan(shares)]
-        shares = shares[~np.isnan(shares)]
-    elif na_action == "fill":
-        shares[np.isnan(shares)] = (1 - np.nansum(shares)) / np.isnan(shares).sum()
-    else:
-        raise ValueError('na_action must be either "remove" or "fill"!')
-
-    if not np.isclose(np.sum(shares), 1):
-        raise ValueError(
-            'shares must sum to one! If you have NAs in your shares consider setting "na_action" to "fill".'
-        )
 
     K = len(shares)
     have_mean_only = np.isfinite(shares) & ~np.isfinite(sds)
     have_sd_only = np.isfinite(sds) & ~np.isfinite(shares)
-    if np.sum(have_mean_only) > 0:
+    if np.sum(have_sd_only) > 0:
         warnings.warn(
-            "You have standard deviations for shares without a best guess estimate. This is not recommended, please check your inputs. These will be treated as missing values and removed from the calculation."
+            "You have standard deviations for shares without a best guess estimate. This is not recommended, please check your inputs. These will be treated as missing values and ignored for the calculation."
         )
     have_both = np.isfinite(shares) & np.isfinite(sds)
 
     if np.all(have_both):
         # use generalized dirichlet
-        sample, gamma = generalized_dirichlet(n, shares, sds)
+        sample, gamma_par = generalized_dirichlet(n, shares, sds)
     elif np.all(have_mean_only):
         # maximize entropy for dirichlet
-        sample, gamma = dirichlet_max_ent(n, shares, grad_based=grad_based, **kwargs)
+        sample, gamma_par = dirichlet_max_ent(n, shares, grad_based=grad_based, **kwargs)
     else:
-        #
-        sample = np.zeros((n, K))
-        if np.sum(have_both) > 0:
-            sample[:, have_both] = rbeta3(
-                n, shares[have_both], sds[have_both], max_iter=max_iter
+        # option 1: has partial mean and no sd: assign unkown means (1-sum(known means))/N_unknown_means and use max ent dirichlet
+        if np.sum(have_mean_only) > 0 and np.sum(have_both) == 0:
+            remaining_share = (
+                1 - np.sum(shares[have_mean_only])
+            ) / np.sum(~have_mean_only)
+            shares[~have_mean_only] = remaining_share
+            sample, gamma_par = dirichlet_max_ent(
+                n, shares, grad_based=grad_based, **kwargs
             )
-        if np.sum(have_mean_only) > 0:
-            alpha2 = shares[have_mean_only] / np.sum(shares[have_mean_only])
-            sample_temp, gamma = dirichlet_max_ent(n, alpha2, **kwargs)
-            sample[:, have_mean_only] = sample_temp * (
-                1 - sample.sum(axis=1, keepdims=True)
-            )
+        # option 2: has partial both mean and sd: use double layer dirichlet
+        elif np.sum(have_both) > 0:
+            sum_shares = shares[have_both].sum()
+            haveboth_indices = np.where(have_both)[0]
+            firstlayer_shares = [1-sum_shares, sum_shares]
+            firstlayer_sample = dirichlet.rvs(firstlayer_shares, size=n)
 
-    return sample, gamma
+            if np.sum(have_mean_only) == 0:
+                #use maxent dirichlet for unkown shares
+                remaining_share = (1 - sum_shares)/ np.sum(~have_both)
+                unknown_shares = [remaining_share]*np.sum(~have_both)
+                unknown_shares = unknown_shares / np.sum(unknown_shares)
+                unknown_sample, gamma_par = dirichlet_max_ent(
+                    n, unknown_shares, grad_based=grad_based, **kwargs
+                )
+                unkown_indices = np.where(~have_both)[0]
+                first_sample = firstlayer_sample[:, 0].reshape(-1,1) * unknown_sample
+
+            else:
+                # use maxent dirichlet for unkown shares and the known shares without sd
+                remaining_share = (1 - sum_shares - shares[have_mean_only].sum())/ np.isnan(shares).sum()
+                unknown_indices = np.where(np.isnan(shares))[0]
+                unknown_shares = [remaining_share]*np.isnan(shares).sum()
+                mean_only_shares = list(shares[have_mean_only]) + unknown_shares
+                mean_only_shares = mean_only_shares / np.sum(mean_only_shares)
+                meanonly_indices = np.where(have_mean_only)[0]
+                mean_only_indices = np.concatenate((meanonly_indices, unknown_indices))
+                mean_only_sample, gamma_par = dirichlet_max_ent(
+                    n, mean_only_shares, grad_based=grad_based, **kwargs)
+                first_sample = firstlayer_sample[:, 0].reshape(-1,1) * mean_only_sample
+
+            # use generalized dirichlet for known shares
+            known_shares = shares[have_both]/np.sum(shares[have_both])
+            known_sds = sds[have_both]/np.sum(shares[have_both])
+            known_sample, _  = generalized_dirichlet(
+                n, known_shares, known_sds
+            )
+            second_sample = firstlayer_sample[:, 1].reshape(-1,1) * known_sample
+
+            # combine the two samples
+            sample = np.hstack((first_sample, second_sample))
+            indices = np.concatenate((unkown_indices, haveboth_indices))
+            # reorder the sample to match the original shares
+            sample[:, indices] = sample
+
+            assert sample.shape == (n, K), f"sample shape is {sample.shape} but should be {(n, K)}"
+
+        # sample = np.zeros((n, K))
+        # if np.sum(have_both) > 0:
+        #     sample[:, have_both] = rbeta3(
+        #         n, shares[have_both], sds[have_both], max_iter=max_iter
+        #     )
+        # if np.sum(have_mean_only) > 0:
+        #     alpha2 = shares[have_mean_only] / np.sum(shares[have_mean_only])
+        #     sample_temp, gamma_par = dirichlet_max_ent(n, alpha2, **kwargs)
+        #     sample[:, have_mean_only] = sample_temp * (
+        #         1 - sample.sum(axis=1, keepdims=True)
+        #     )
+
+    return sample, gamma_par
 
 
 def rbeta3(n, shares, sds, fix=True, max_iter=1e3):

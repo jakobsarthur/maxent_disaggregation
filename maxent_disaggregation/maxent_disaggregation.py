@@ -14,7 +14,8 @@ def maxent_disagg(
     sds: np.ndarray | list = None,
     log: bool = False,
     grad_based: bool = False,
-    na_action: str = "fill",
+    return_shares: bool = False,
+    return_aggregate: bool = False,
     max_iter: int = 1e3,
 ) -> np.ndarray:
     """
@@ -88,13 +89,14 @@ def maxent_disagg(
         shares=shares,
         sds=sds,
         grad_based=grad_based,
-        na_action=na_action,
         max_iter=max_iter,
     )
     # Check if the shares sum to 1
     if not np.isclose(np.sum(samples_shares, axis=1), 1).all():
         raise ValueError("Shares do not sum to 1! Check your shares and sds.")
     sample_disagg = samples_shares * samples_agg[:, np.newaxis]
+    if return_aggregate and return_shares:
+        return sample_disagg, samples_agg, samples_shares, gamma
     return sample_disagg, gamma
 
 
