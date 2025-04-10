@@ -2,6 +2,7 @@ import numpy as np
 from scipy.special import polygamma, psi
 from scipy.stats import dirichlet
 import nlopt
+from collections.abc import Callable
 
 
 def dirichlet_entropy_derivative(gamma_par, shares):
@@ -57,15 +58,15 @@ def dirichlet_entropy(gamma_par, shares):
 
 def find_gamma_maxent(
     shares: np.ndarray | list = None,
-    eval_f: function =dirichlet_entropy,
+    eval_f: Callable =dirichlet_entropy,
     x0: float = 1,
     x0_n_tries: int = 100,
     bounds: tuple = (0.001, 172),
     shares_lb: float = 0,
-    eval_grad_f: function = dirichlet_entropy_derivative,
+    eval_grad_f: Callable = dirichlet_entropy_derivative,
     grad_based: bool = False,
-) -> float:
-      """
+    ) -> float:
+    """
     Finds the gamma parameter that maximizes the entropy of a Dirichlet distribution 
     given a set of shares. This function uses the NLopt library for optimization.
     Parameters:
@@ -164,7 +165,6 @@ def find_gamma_maxent(
     opt.set_maxeval(1000)
 
     if grad_based:
-        print("Using gradient-based optimization.")
         local_opt = nlopt.opt(nlopt.LD_MMA, 1)
         local_opt.set_xtol_rel(1.0e-4)
         opt.set_local_optimizer(local_opt)
