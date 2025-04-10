@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2022-03-22
+## [0.0.2] - 2025-04-10
+* Incorporated nested sampling in mixed information case. Also testing for the mean of the sampled shares vs the provided shares and warns if above a threshold value. Same for the standatrd deviations on the mean.
 
 ### Added
 
