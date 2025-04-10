@@ -1,10 +1,9 @@
 # maxent_disaggregation
 
-```{button-link} https://docs.brightway.dev
+```{button-link}
 :color: info
 :expand:
-{octicon}`light-bulb;1em` maxent_disaggregation is a specialized package of the Brightway Software Framework
-```
+{octicon}`light-bulb;1em` maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
 
 ```{toctree}
 ---
