@@ -149,7 +149,7 @@ def sample_aggregate(
                 )
                 low_bound = 0
             if high_bound != np.inf:
-                warning(
+                warnings.warn(
                     "You provided a finite high bound, currently this not supported for the lognormal distribution. High bound is ignored. Alternatively set log=False."
                 )
             # Lognormal distribution
