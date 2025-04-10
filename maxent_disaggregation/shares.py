@@ -213,13 +213,23 @@ def sample_shares(
     sample_sd = np.std(sample, axis=0)
     diff_mean = np.abs(sample_mean - shares) / shares
     diff_sd = np.abs(sample_sd - sds) / sds
-    if np.any(diff_mean > threshold_shares):
+    means_above_threshold = diff_mean > threshold_shares
+    indices_above_threshold = np.where(means_above_threshold)[0]
+    if np.any(means_above_threshold):
         warnings.warn(
             f"The generated samples for the shares have a mean that is more than {threshold_shares*100}% different from the specified shares. Please check your inputs. Reasons for this could be large relative uncertainties for the shares, or a small number of samples. To surpress this warning you can set a higher threshold_shares."
         )
-    if np.any(diff_sd > threshold_sd):
+        print(
+            f"Shares above threshold: {diff_mean[means_above_threshold]}, shares: {shares[means_above_threshold]}, sample_mean: {sample_mean[means_above_threshold]}, indices: {indices_above_threshold}"
+        )
+    sds_above_threshold = diff_sd > threshold_sd
+    indices_above_threshold = np.where(sds_above_threshold)[0]
+    if np.any(sds_above_threshold):
         warnings.warn(
             f"The generated samples for the shares have a standard deviation that is more than {threshold_sd*100}% different from the specified sd's. Please note that the specified sd's might be incompetibale with the other constraints. Please check your inputs. To surpress this warning you can set a higher threshold_sd."
+        )
+        print(
+            f"Sds above threshold: {diff_sd[sds_above_threshold]}, sds: {sds[sds_above_threshold]}, sample_sd: {sample_sd[sds_above_threshold]}, indices: {indices_above_threshold}"
         )
 
     return sample, gamma_par
