@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import dirichlet, gamma
+import scipy.stats as stats
 from .maxent_direchlet import find_gamma_maxent, dirichlet_entropy
 import warnings
 warnings.simplefilter("always", UserWarning) # Ensure the warning is always shown
@@ -59,7 +60,7 @@ def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
     """
 
     gamma_par = find_gamma_maxent(shares, eval_f=dirichlet_entropy, **kwargs)
-    sample = dirichlet.rvs(shares * gamma_par, size=n)
+    sample = sample_dirichlet(shares * gamma_par, size=n)
     return sample, gamma_par
 
 
@@ -163,7 +164,7 @@ def sample_shares(
             sum_shares = shares[have_both].sum()
             haveboth_indices = np.where(have_both)[0]
             firstlayer_shares = [1 - sum_shares, sum_shares]
-            firstlayer_sample = dirichlet.rvs(firstlayer_shares, size=n)
+            firstlayer_sample = sample_dirichlet(firstlayer_shares, size=n)
 
             if np.sum(have_mean_only) == 0:
                 # use maxent dirichlet for unkown shares
@@ -233,3 +234,67 @@ def sample_shares(
         )
 
     return sample, gamma_par
+
+
+
+def sample_dirichlet(shares, size=None, gamma_par=None, treshhold=0.0   1, force_nonzero_samples=True):
+    """
+    A wrapper function to sample from a Dirichlet distribution with a given set of shares and gamma concentration parameter.
+
+    It differs from the default Dirichlet distroibution in that when the 
+
+    For each variable \eqn{i} whose mean value (\eqn{\alpha_i = \gamma_{par} \cdot share_i})
+    that is below a `threshold`, a fallback parametrization of the Gamma distribution (which is used for sampling from the 
+    Dirichlet distribution) is applied to avoid zero or near-zero sampling. This is especially useful for very
+    small shape parameters, which can cause numerical issues in in the dirichlet sampling.
+    The following pragmatic workaround is used that sets:
+        - \eqn{\alpha_i = 1} (shape) for shares below `threshold`
+        - \eqn{rate = 1 / \alpha_i} ensuring less extreme values.
+    For more details, see the discussion in [rgamma()] under "small shape values" and
+    the references there. This approach helps mitigate issues where numeric precision
+    can push small Gamma-distributed values to zero (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/GammaDist.html).
+    Note however that fix changes the expectation values (means) of the sampled parameters such that they
+    can deviate from the inputed shares. If this is undesired set force_nonzero_samples=False.
+
+
+    
+    Parameters:
+    -----------
+    size : int
+        The number of samples to generate.
+    shares : array-like
+        The input shares (probabilities) that define the Dirichlet distribution.
+    gamma_par : float
+        The gamma parameter that scales the shares for the Dirichlet distribution.
+    threshold : float
+        The threshold below which the shares are adjusted to avoid zero sampling.
+    force_nonzero_samples : bool
+        If True, forces non-zero samples by adjusting alphas and rate/scale within
+        the gamma distribution. This may lead to biased means of the samples.
+        If False, uses the original scipy implementation of the Dirichlet distribution.
+        Note that in the case of very small alphas, this may lead to a large number zeros
+        in the samples due to numerical issues. The means are unbiased though.
+
+    Methods:
+    --------
+    sample():
+        Generates samples from the Dirichlet distribution.
+    """
+
+    if gamma_par is None:
+        alpha = shares
+    else:
+        alpha = shares * gamma_par
+    
+
+    if force_nonzero_samples:
+        return stats.dirichlet.rvs(alpha, size=size)
+    else:
+        l = len(alpha)
+        rate = np.ones(l)
+        rate[alpha < threshold] = 1 / alpha[alpha < threshold]
+        alpha[alpha < threshold] = 1
+        x = gamma.rvs(alpha, scale=1/rate, size=(size, l))
+        sample = x / x.sum(axis=1, keepdims=True)
+        return sample
+
