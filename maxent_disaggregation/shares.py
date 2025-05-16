@@ -1,18 +1,23 @@
+import warnings
 import numpy as np
 from scipy.stats import dirichlet, gamma
 import scipy.stats as stats
 from .maxent_direchlet import find_gamma_maxent, dirichlet_entropy
-import warnings
-warnings.simplefilter("always", UserWarning) # Ensure the warning is always shown
+
+# set the warning filter to always show warnings
+warnings.simplefilter("always", UserWarning)
 
 
 def generalized_dirichlet(n, shares, sds):
     """
-    Generate random samples from a Generalised Dirichlet distribution with given shares and standard deviations.
+    Generate random samples from a Generalised Dirichlet distribution
+    with given shares and standard deviations.
 
     Reference:
     ----------------
-    Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot. “Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks: The Case of Dissociative Recombinations.”
+    Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot.
+    “Knowledge-Based Probabilistic Representations of Branching Ratios in
+    Chemical Networks: The Case of Dissociative Recombinations.”
     The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110.
     https://doi.org/10.1063/1.3479907.
 
@@ -60,7 +65,7 @@ def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
     """
 
     gamma_par = find_gamma_maxent(shares, eval_f=dirichlet_entropy, **kwargs)
-    sample = sample_dirichlet(shares * gamma_par, size=n)
+    sample = sample_dirichlet(shares * gamma_par, size=n, **kwargs)
     return sample, gamma_par
 
 
@@ -92,14 +97,15 @@ def sample_shares(
     max_iter : float, optional
         Maximum number of iterations for optimization algorithms. Default is 1e3.
     grad_based : bool, optional
-        Whether to use gradient-based optimization for maximum entropy Dirichlet sampling. Default is False.
+        Whether to use gradient-based optimization for maximum entropy Dirichlet sampling.
+        Default is False.
     threshold_shares : float, optional
-        Threshold for the relative difference between the sample mean and the specified shares. If the
-        difference exceeds this threshold, a warning is raised.
+        Threshold for the relative difference between the sample mean and the
+        specified shares. If the difference exceeds this threshold, a warning is raised.
         Default is 0.1 (10%).
     threshold_sd : float, optional
-        Threshold for the relative difference between the sample standard deviation and the specified sds. If the
-        difference exceeds this threshold, a warning is raised.
+        Threshold for the relative difference between the sample standard deviation and
+        the specified sds. If the difference exceeds this threshold, a warning is raised.
         Default is 0.2 (20%).
     **kwargs : dict
         Additional keyword arguments passed to the underlying sampling functions.
@@ -164,7 +170,7 @@ def sample_shares(
             sum_shares = shares[have_both].sum()
             haveboth_indices = np.where(have_both)[0]
             firstlayer_shares = [1 - sum_shares, sum_shares]
-            firstlayer_sample = sample_dirichlet(firstlayer_shares, size=n)
+            firstlayer_sample = sample_dirichlet(firstlayer_shares, size=n, **kwargs)
 
             if np.sum(have_mean_only) == 0:
                 # use maxent dirichlet for unkown shares
@@ -174,7 +180,7 @@ def sample_shares(
                 unknown_sample, gamma_par = dirichlet_max_ent(
                     n, unknown_shares, grad_based=grad_based, **kwargs
                 )
-                unkown_indices = np.where(~have_both)[0]
+                unknown_indices = np.where(~have_both)[0]
                 first_sample = firstlayer_sample[:, 0].reshape(-1, 1) * unknown_sample
 
             else:
@@ -182,7 +188,7 @@ def sample_shares(
                 remaining_share = (
                     1 - sum_shares - shares[have_mean_only].sum()
                 ) / np.isnan(shares).sum()
-                unknown_indices = np.where(np.isnan(shares))[0]
+                unknown_indices = np.where(~have_both)[0]
                 unknown_shares = [remaining_share] * np.isnan(shares).sum()
                 mean_only_shares = list(shares[have_mean_only]) + unknown_shares
                 mean_only_shares = mean_only_shares / np.sum(mean_only_shares)
@@ -201,7 +207,7 @@ def sample_shares(
 
             # combine the two samples
             sample = np.hstack((first_sample, second_sample))
-            indices = np.concatenate((unkown_indices, haveboth_indices))
+            indices = np.concatenate((unknown_indices, haveboth_indices))
             # reorder the sample to match the original shares
             sample[:, indices] = sample
 
@@ -221,7 +227,9 @@ def sample_shares(
             f"The generated samples for the shares have a mean that is more than {threshold_shares*100}% different from the specified shares. Please check your inputs. Reasons for this could be large relative uncertainties for the shares, or a small number of samples. To surpress this warning you can set a higher threshold_shares."
         )
         print(
-            f"Shares above threshold: {diff_mean[means_above_threshold]}, shares: {shares[means_above_threshold]}, sample_mean: {sample_mean[means_above_threshold]}, indices: {indices_above_threshold}"
+            f"Shares above threshold: {diff_mean[means_above_threshold]},\
+             shares: {shares[means_above_threshold]}, sample_mean: {sample_mean[means_above_threshold]},\
+             indices: {indices_above_threshold}"
         )
     sds_above_threshold = diff_sd > threshold_sd
     indices_above_threshold = np.where(sds_above_threshold)[0]
@@ -230,34 +238,46 @@ def sample_shares(
             f"The generated samples for the shares have a standard deviation that is more than {threshold_sd*100}% different from the specified sd's. Please note that the specified sd's might be incompetibale with the other constraints. Please check your inputs. To surpress this warning you can set a higher threshold_sd."
         )
         print(
-            f"Sds above threshold: {diff_sd[sds_above_threshold]}, sds: {sds[sds_above_threshold]}, sample_sd: {sample_sd[sds_above_threshold]}, indices: {indices_above_threshold}"
+            f"Sds above threshold: {diff_sd[sds_above_threshold]},\
+             sds: {sds[sds_above_threshold]}, sample_sd: {sample_sd[sds_above_threshold]},\
+             indices: {indices_above_threshold}"
         )
 
     return sample, gamma_par
 
 
-
-def sample_dirichlet(shares, size=None, gamma_par=None, treshhold=0.0   1, force_nonzero_samples=True):
+def sample_dirichlet(
+    shares,
+    size=None,
+    gamma_par=None,
+    threshold_dirichlet=0.01,
+    force_nonzero_samples=True,
+    **kwargs,
+):
     """
-    A wrapper function to sample from a Dirichlet distribution with a given set of shares and gamma concentration parameter.
+    A wrapper function to sample from a Dirichlet distribution with a
+    given set of shares and gamma concentration parameter.
 
-    It differs from the default Dirichlet distroibution in that when the 
+    It differs from the default Dirichlet distroibution in that when the
 
     For each variable \eqn{i} whose mean value (\eqn{\alpha_i = \gamma_{par} \cdot share_i})
-    that is below a `threshold`, a fallback parametrization of the Gamma distribution (which is used for sampling from the 
-    Dirichlet distribution) is applied to avoid zero or near-zero sampling. This is especially useful for very
+    that is below a `threshold`, a fallback parametrization of the Gamma distribution
+    (which is used for sampling from the Dirichlet distribution) is applied to avoid
+    zero or near-zero sampling. This is especially useful for very
     small shape parameters, which can cause numerical issues in in the dirichlet sampling.
     The following pragmatic workaround is used that sets:
         - \eqn{\alpha_i = 1} (shape) for shares below `threshold`
         - \eqn{rate = 1 / \alpha_i} ensuring less extreme values.
     For more details, see the discussion in [rgamma()] under "small shape values" and
     the references there. This approach helps mitigate issues where numeric precision
-    can push small Gamma-distributed values to zero (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/GammaDist.html).
-    Note however that fix changes the expectation values (means) of the sampled parameters such that they
-    can deviate from the inputed shares. If this is undesired set force_nonzero_samples=False.
+    can push small Gamma-distributed values to zero (see
+    https://stat.ethz.ch/R-manual/R-devel/library/stats/html/GammaDist.html).
+    Note however that fix changes the expectation values (means) of the sampled parameters
+    such that they can deviate from the inputed shares. If this is undesired
+    set force_nonzero_samples=False.
 
 
-    
+
     Parameters:
     -----------
     size : int
@@ -282,19 +302,18 @@ def sample_dirichlet(shares, size=None, gamma_par=None, treshhold=0.0   1, force
     """
 
     if gamma_par is None:
-        alpha = shares
+        alpha = np.asarray(shares)
     else:
-        alpha = shares * gamma_par
-    
+        alpha = np.asarray(shares) * gamma_par
 
-    if force_nonzero_samples:
+    if not force_nonzero_samples:
+        print("Using scipy dirichlet!!!!!")
         return stats.dirichlet.rvs(alpha, size=size)
     else:
         l = len(alpha)
         rate = np.ones(l)
-        rate[alpha < threshold] = 1 / alpha[alpha < threshold]
-        alpha[alpha < threshold] = 1
-        x = gamma.rvs(alpha, scale=1/rate, size=(size, l))
+        rate[alpha < threshold_dirichlet] = 1 / alpha[alpha < threshold_dirichlet]
+        alpha[alpha < threshold_dirichlet] = 1
+        x = gamma.rvs(alpha, scale=1 / rate, size=(size, l))
         sample = x / x.sum(axis=1, keepdims=True)
         return sample
-

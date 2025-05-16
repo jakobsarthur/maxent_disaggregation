@@ -65,6 +65,7 @@ def find_gamma_maxent(
     shares_lb: float = 0,
     eval_grad_f: Callable = dirichlet_entropy_derivative,
     grad_based: bool = False,
+    **kwargs,
     ) -> float:
     """
     Finds the gamma parameter that maximizes the entropy of a Dirichlet distribution 
