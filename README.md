@@ -7,9 +7,8 @@
 
 [![Read the documentation at https://maxent_disaggregation.readthedocs.io/](https://img.shields.io/readthedocs/maxent_disaggregation/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/jakobsarthur/maxent_disaggregation/actions/workflows/python-test.yml/badge.svg)][tests]
-[![Codecov](https://codecov.io/gh/jakobsarthur/maxent_disaggregation/branch/main/graph/badge.svg)][codecov]
 
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
+
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
 [pypi status]: https://pypi.org/project/maxent_disaggregation/
@@ -19,6 +18,15 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
+(https://github.com/jakobsarthur/maxent_disaggregation)[maxent_disaggregation] is a python package to help with the propagation of uncertainty when disaggregating data, based on the maximum entropy principle. It samples from various forms of the Dirichlet distribution, maximising the entropy based on the available information. 
+
+
+
+
+
+
+
+
 ## Installation
 
 You can install _maxent_disaggregation_ via [pip] from [PyPI]:
@@ -26,6 +34,49 @@ You can install _maxent_disaggregation_ via [pip] from [PyPI]:
 ```console
 $ pip install maxent_disaggregation
 ```
+
+## Quick start
+
+```python
+from maxent_disaggregation import maxent_disagg
+import numpy as np
+
+# best guess or mean of the total quantity (if available)
+mean_aggregate = 10
+# best guess of the standard deviation of the total quantity (if available)
+sd_aggregate = 1
+# min/max value of the total quantity (if applicable/available) (optional)
+min_aggregate = 0
+max_aggregate = np.inf
+# best guess values and uncertainties from proxy data if available (of not available put in np.nan)
+shares_disaggregates = [0.4, 0.25, 0.2, 0.15]
+sds_shares = [0.1, np.nan, 0.04, 0.001]
+
+# Now draw 10000 samples
+samples, _ = maxent_disagg(n=10000, 
+                        mean_0=mean_aggregate,
+                        sd_0=sd_aggregate,
+                        min_0=min_aggregate,
+                        max_0=max_aggregate, 
+                        shares=shares_disaggregates, 
+                        sds=sds_shares, 
+                        )
+
+# Now plot the sampled distributions
+from maxent_disaggregation import plot_samples_hist
+# the input values are provided for the legend
+plot_samples_hist(samples, 
+                  mean_0=mean_aggregate,
+                  sd_0=sd_aggregate, 
+                  shares=shares_disaggregates, 
+                  sds=sds_shares)
+```
+```{image} /docs/content/data/Quickstart_example.png
+:align: center
+:alt: Histograms of the samples for both the disaggregate and aggregate values
+```
+
+
 
 ## Contributing
 
@@ -50,23 +101,3 @@ please [file an issue][Issue Tracker] along with a detailed description.
 [Contributor Guide]: https://github.com/jakobsarthur/maxent_disaggregation/blob/main/CONTRIBUTING.md
 [Issue Tracker]: https://github.com/jakobsarthur/maxent_disaggregation/issues
 
-
-## Building the Documentation
-
-You can build the documentation locally by installing the documentation Conda environment:
-
-```bash
-conda env create -f docs/environment.yml
-```
-
-activating the environment
-
-```bash
-conda activate sphinx_maxent_disaggregation
-```
-
-and [running the build command](https://www.sphinx-doc.org/en/master/man/sphinx-build.html#sphinx-build):
-
-```bash
-sphinx-build docs _build/html --builder=html --jobs=auto --write-all; open _build/html/index.html
-```

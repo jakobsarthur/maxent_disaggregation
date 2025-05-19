@@ -1,8 +1,8 @@
+import warnings
 import numpy as np
 from scipy.stats import truncnorm, lognorm
 from .shares import sample_shares
-import warnings
-
+import matplotlib.pyplot as plt
 
 def maxent_disagg(
     n: int,
@@ -12,7 +12,7 @@ def maxent_disagg(
     min_0: float = 0,
     max_0: float = np.inf,
     sds: np.ndarray | list = None,
-    log: bool = False,
+    log: bool = True,
     grad_based: bool = False,
     return_shares: bool = False,
     return_aggregate: bool = False,
@@ -43,6 +43,11 @@ def maxent_disagg(
         The upper boundary of the aggregate value.
     sds:
         The standard deviations of the shares. Set to None if not available.
+    log:
+        If True, the lognormal distribution is used for the aggregate value when a mean
+        and a standard deviation are provided. If False, samples are drawn from a truncated
+        normal distribution, which is the maximum entropy solution but produces a biased mean.
+        Default is True
 
     Returns
     -------
@@ -108,7 +113,7 @@ def sample_aggregate(
     sd: float = None,
     low_bound: float = 0,
     high_bound: float = np.inf,
-    log: bool = False,
+    log: bool = True,
 ) -> np.ndarray:
     """
 
@@ -128,6 +133,11 @@ def sample_aggregate(
         The lower boundary of the aggregate value.
     high_bound:
         The upper boundary of the aggregate value.
+    log:
+        If True, the lognormal distribution is used for the aggregate value when a mean
+        and a standard deviation are provided. If False, samples are drawn from a truncated
+        normal distribution, which is the maximum entropy solution but produces a biased mean.
+        Default is True
     """
 
     if (
@@ -172,3 +182,35 @@ def sample_aggregate(
         return np.random.uniform(low=low_bound, high=high_bound, size=n)
     else:
         raise ValueError("Case not implemented atm.")
+    
+
+def plot_samples_hist(samples, mean_0=None, sd_0=None, shares=None, sds=None, logscale=False):
+    """
+    Plot histograms of samples.
+    :param samples: 2D array of samples
+    :param shares: list of shares for each sample
+    :param sds: list of standard deviations for each sample
+    """
+    for i in range(samples.shape[1]):
+        if sds is not None:
+            std = sds[i]
+        else:
+            std = sds
+        if shares is not None:
+            share = shares[i]
+        else:
+            share = shares
+        x = plt.hist(samples[:,i], bins=100, alpha=0.5, label=f'Share {i+1} input = {share}, SD = {std}', density=True)
+        plt.axvline(x=samples[:,i].mean(), color=x[2][0].get_facecolor(), linestyle='--', label=f'Share {i+1} sample mean')
+    try:
+        x = plt.hist(samples.sum(axis=1), bins=100, alpha=0.5, label=f'Aggregate input= {mean_0}, SD = {sd_0}', density=True)
+        plt.axvline(x=samples.sum(axis=1).mean(), color=x[2][0].get_facecolor(), linestyle='--', label='Aggregate sample mean')
+    except:
+        pass
+    if logscale:
+        plt.xscale('log')
+    plt.legend()
+    plt.ylabel('Probability density')
+    plt.xlabel('Value')
+    plt.title('MaxEnt Disaggregation')
+    plt.show()
