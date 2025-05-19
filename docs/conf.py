@@ -9,8 +9,8 @@ import datetime
 ### project information ###########################################################################
 
 project = "maxent_disaggregation"
-author = "Brightway Developers"
-copyright = datetime.date.today().strftime("%Y") + ' Brightway Developers'
+author = "Arthur Jakobs & Simon Schulte"
+copyright = datetime.date.today().strftime("%Y") + ' Arthur Jakobs & Simon Schulte'
 
 ### project configuration #########################################################################
 
@@ -23,10 +23,18 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.napoleon',
+    'sphinx.ext.inheritance_diagram',
+    # iPython extensions
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
     # theme
     'sphinx_rtd_theme',
     # Markdown support
-    'myst_parser',
+    # 'myst_parser', # do not enable separately if using myst_nb, compare: https://github.com/executablebooks/MyST-NB/issues/421#issuecomment-1164427544
+    # Jupyter Notebook support
+    "myst_nb",
+    # mermaid support
+    "sphinxcontrib.mermaid",
     # API documentation support
     'autoapi',
     # responsive web component support
@@ -99,7 +107,7 @@ autoapi_options = [
 ]
 
 autoapi_python_class_content = 'both'
-autoapi_member_order = 'groupwise'
+autoapi_member_order = 'bysource'
 autoapi_root = 'content/api'
 autoapi_keep_files = False
 
