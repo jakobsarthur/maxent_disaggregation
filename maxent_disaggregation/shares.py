@@ -137,6 +137,8 @@ def sample_shares(
     """
     if sds is None:
         sds = np.full_like(shares, np.nan)
+    shares = np.asarray(shares)
+    sds = np.asarray(sds)
 
     K = len(shares)
     have_mean_only = np.isfinite(shares) & ~np.isfinite(sds)

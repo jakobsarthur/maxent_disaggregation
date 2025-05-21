@@ -10,8 +10,8 @@ def maxent_disagg(
     mean_0: float,
     shares: np.ndarray | list,
     sd_0: float = None,
-    min_0: float = 0,
-    max_0: float = np.inf,
+    min_0: float = None,
+    max_0: float = None,
     sds: np.ndarray | list = None,
     log: bool = True,
     grad_based: bool = False,
@@ -144,8 +144,8 @@ def sample_aggregate(
     if (
         mean is not None
         and sd is not None
-        and low_bound == -np.inf
-        and high_bound == np.inf
+        and (low_bound == -np.inf or low_bound is None)
+        and (high_bound == np.inf or high_bound is None)
     ):
         # Normal distribution
         return np.random.normal(loc=mean, scale=sd, size=n)
@@ -170,7 +170,7 @@ def sample_aggregate(
             mu = np.log(mean) - 0.5 * sigma**2
             return lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
 
-    elif mean is not None and sd is None and low_bound == 0 and high_bound == np.inf:
+    elif mean is not None and sd is None and low_bound == 0 and (high_bound == np.inf or high_bound is None):
         # Exponential
         return np.random.exponential(scale=mean, size=n)
     elif (
