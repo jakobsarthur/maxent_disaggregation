@@ -4,6 +4,7 @@ from scipy.stats import truncnorm, lognorm
 from .shares import sample_shares
 import matplotlib.pyplot as plt
 
+
 def maxent_disagg(
     n: int,
     mean_0: float,
@@ -182,9 +183,19 @@ def sample_aggregate(
         return np.random.uniform(low=low_bound, high=high_bound, size=n)
     else:
         raise ValueError("Case not implemented atm.")
-    
 
-def plot_samples_hist(samples, mean_0=None, sd_0=None, shares=None, sds=None, logscale=False):
+
+def plot_samples_hist(
+    samples,
+    mean_0=None,
+    sd_0=None,
+    shares=None,
+    sds=None,
+    logscale=False,
+    plot_agg=True,
+    save=False,
+    filename=None,
+):
     """
     Plot histograms of samples.
     :param samples: 2D array of samples
@@ -200,17 +211,43 @@ def plot_samples_hist(samples, mean_0=None, sd_0=None, shares=None, sds=None, lo
             share = shares[i]
         else:
             share = shares
-        x = plt.hist(samples[:,i], bins=100, alpha=0.5, label=f'Share {i+1} input = {share}, SD = {std}', density=True)
-        plt.axvline(x=samples[:,i].mean(), color=x[2][0].get_facecolor(), linestyle='--', label=f'Share {i+1} sample mean')
-    try:
-        x = plt.hist(samples.sum(axis=1), bins=100, alpha=0.5, label=f'Aggregate input= {mean_0}, SD = {sd_0}', density=True)
-        plt.axvline(x=samples.sum(axis=1).mean(), color=x[2][0].get_facecolor(), linestyle='--', label='Aggregate sample mean')
-    except:
-        pass
+        x = plt.hist(
+            samples[:, i],
+            bins=100,
+            alpha=0.5,
+            label=f"Share {i+1} input = {share}, SD = {std}",
+            density=True,
+        )
+        plt.axvline(
+            x=samples[:, i].mean(),
+            color=x[2][0].get_facecolor(),
+            linestyle="--",
+            label=f"Share {i+1} sample mean",
+        )
+    if plot_agg:
+        x = plt.hist(
+            samples.sum(axis=1),
+            bins=100,
+            alpha=0.5,
+            label=f"Aggregate input= {mean_0}, SD = {sd_0}",
+            density=True,
+        )
+        plt.axvline(
+            x=samples.sum(axis=1).mean(),
+            color=x[2][0].get_facecolor(),
+            linestyle="--",
+            label="Aggregate sample mean",
+        )
     if logscale:
-        plt.xscale('log')
+        plt.xscale("log")
     plt.legend()
-    plt.ylabel('Probability density')
-    plt.xlabel('Value')
-    plt.title('MaxEnt Disaggregation')
+    plt.ylabel("Probability density")
+    plt.xlabel("Value")
+    plt.title("MaxEnt Disaggregation")
+
+    if save:
+        if filename is None:
+            raise ValueError("Filename must be provided if save is True.")
+        plt.savefig(filename)
+    
     plt.show()
