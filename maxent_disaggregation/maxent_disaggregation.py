@@ -193,6 +193,7 @@ def plot_samples_hist(
     sds=None,
     logscale=False,
     plot_agg=True,
+    title=None,
     save=False,
     filename=None,
 ):
@@ -243,7 +244,9 @@ def plot_samples_hist(
     plt.legend()
     plt.ylabel("Probability density")
     plt.xlabel("Value")
-    plt.title("MaxEnt Disaggregation")
+    if title==None:
+        title = "MaxEnt Disaggregation"
+    plt.title(title)
 
     if save:
         if filename is None:
