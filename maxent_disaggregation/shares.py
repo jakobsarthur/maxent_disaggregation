@@ -155,6 +155,13 @@ def sample_shares(
         sample, gamma_par = dirichlet_max_ent(
             n, shares, grad_based=grad_based, **kwargs
         )
+    elif np.isfinite(shares).sum()==0:
+        # no information on the shares, use uniform dirichlet
+        shares = np.asarray([1/len(shares)]*len(shares))
+        sample = sample_dirichlet(shares=shares, size=n)
+        # break out because it does not need to check the means and sd's 
+        return sample, None
+    
     else:
         # option 1: has partial mean and no sd: assign unkown means (1-sum(known means))/N_unknown_means and use max ent dirichlet
         if np.sum(have_mean_only) > 0 and np.sum(have_both) == 0:
@@ -216,6 +223,7 @@ def sample_shares(
                 K,
             ), f"sample shape is {sample.shape} but should be {(n, K)}"
 
+    # check if sample means and standard deviations deviate more than the threshold values:
     sample_mean = np.mean(sample, axis=0)
     sample_sd = np.std(sample, axis=0)
     diff_mean = np.abs(sample_mean - shares) / shares
@@ -253,7 +261,7 @@ def sample_dirichlet(
     threshold_dirichlet=0.01,
     force_nonzero_samples=True,
     **kwargs,
-):
+    ):
     """
     A wrapper function to sample from a Dirichlet distribution with a
     given set of shares and gamma concentration parameter.
