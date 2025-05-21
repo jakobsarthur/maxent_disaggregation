@@ -18,7 +18,7 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-(https://github.com/jakobsarthur/maxent_disaggregation)[maxent_disaggregation] is a python package to help with the propagation of uncertainty when disaggregating data, based on the maximum entropy principle. It samples from various forms of the Dirichlet distribution, maximising the entropy based on the available information. 
+[maxent_disaggregation](https://github.com/jakobsarthur/maxent_disaggregation) is a python package to help with the propagation of uncertainty when disaggregating data, based on the maximum entropy principle. It samples from various forms of the Dirichlet distribution, maximising the entropy based on the available information. 
 
 
 
