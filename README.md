@@ -29,7 +29,7 @@
 
 ## Installation
 
-You can install _maxent_disaggregation_ via [pip] from [PyPI]:
+You can install _maxent_disaggregation_ via `pip` from [PyPI](https://pypi.org/project/maxent-disaggregation/):
 
 ```console
 $ pip install maxent_disaggregation
