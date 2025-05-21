@@ -1,9 +1,10 @@
 # maxent_disaggregation
 
-```{button-link}
+```{button-link} https://github.com/jakobsarthur/maxent_disaggregation
 :color: info
 :expand:
-{octicon}`light-bulb;1em` maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
+💡 maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
+
 ```
 
 ## ✨ Features
