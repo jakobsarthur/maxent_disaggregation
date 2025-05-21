@@ -4,6 +4,7 @@
 :color: info
 :expand:
 {octicon}`light-bulb;1em` maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
+```
 
 ## ✨ Features
 This package enables you to account for:
@@ -27,11 +28,14 @@ If you have any questions or need help, do not hesitate to contact us:
 hidden:
 maxdepth: 1
 ---
-self
-content/usage
-content/api/index
-content/codeofconduct
-content/contributing
-content/license
-content/changelog
+
+Installation <content/installation>
+Usage <content/usage>
+Theory <content/theory>
+Examples <content/examples/index>
+API <content/api/index>
+Code of Conduct <content/codeofconduct>
+Contributing <content/contributing>
+License <content/license>
+Changelog <content/changelog>
 ```

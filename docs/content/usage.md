@@ -1,6 +1,8 @@
-# Usage
+# Quickstart
 
-## Quickstart
+After installation use the following example as a way to quickly guide you through the usage of the `maxent_disaggregation` package. For more detailed examples please see [Examples](./examples/index.md)
+
+
 ```python
 from maxent_disaggregation import maxent_disagg
 import numpy as np
@@ -35,7 +37,8 @@ plot_samples_hist(samples,
                   shares=shares_disaggregates, 
                   sds=sds_shares)
 ```
-```{image} /docs/content/data/Quickstart_example.png
+```{figure} data/Quickstart_example.svg
 :align: center
-:alt: Histograms of the samples for both the disaggregate and aggregate values
+:alt: Histograms of the samples for both the disaggregate and aggregate values.
+Figure 1: Histograms of the samples for both the disaggregate and aggregate values. The dashed vertical lines indicate the means of the sampled distributions. The input values are given in the legend. 
 ```

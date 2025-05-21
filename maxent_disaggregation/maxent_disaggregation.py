@@ -110,7 +110,7 @@ def maxent_disagg(
 
 def sample_aggregate(
     n: int,
-    mean: float,
+    mean: float = None,
     sd: float = None,
     low_bound: float = 0,
     high_bound: float = np.inf,
