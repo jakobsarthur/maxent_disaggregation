@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "maxent_disaggregation"
 authors = [
-  { name="Arthur Jakobs", email="artos.jakobs@psi.ch" }
+  { name="Arthur Jakobs", email="artos.jakobs@psi.ch" },
+  { name="Simon Schulte", email="simonsc@plan.aau.dk" }
 ]
 maintainers = [
   { name="Arthur Jakobs", email="artos.jakobs@psi.ch" }
