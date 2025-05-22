@@ -160,7 +160,8 @@ def sample_shares(
     elif np.isfinite(shares).sum()==0:
         # no information on the shares, use uniform dirichlet
         shares = np.asarray([1/len(shares)]*len(shares))
-        sample = sample_dirichlet(shares=shares, size=n)
+        gamma_par = len(shares)  # the maximum entropy solution has a concentration parameter equal to the number of shares
+        sample = sample_dirichlet(shares=shares, gamma_par=gamma_par, size=n)
         # break out because it does not need to check the means and sd's 
         return sample, None
     
