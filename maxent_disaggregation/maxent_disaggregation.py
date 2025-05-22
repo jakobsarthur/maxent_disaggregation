@@ -68,13 +68,14 @@ def maxent_disagg(
         else:
             raise ValueError("Sds should be a numpy array or a list.")
 
-    # check shares contain at least one non-NA value
-    if np.all(np.isnan(shares)):
-        raise ValueError("Shares should contain at least one non-NA value.")
     # check shares sum to 1
-    elif not np.any(np.isnan(shares)):
+    if not np.any(np.isnan(shares)):
         if not np.isclose(np.sum(shares), 1):
             raise ValueError("Shares should sum to 1 unless there are NA values.")
+    # Or are less than 1 if NA values are present
+    else:
+        if not np.nansum(shares) < 1:
+            raise ValueError("Shares should sum to less than 1 if NA values are present.")
     # check shares and sds have the same length
     if sds is not None:
         if len(shares) != len(sds):
