@@ -12,7 +12,7 @@
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
 [pypi status]: https://pypi.org/project/maxent_disaggregation/
-[read the docs]: https://maxent_disaggregation.readthedocs.io/
+[read the docs]: https://maxent-disaggregation.readthedocs.io/en/latest/index.html
 [tests]: https://github.com/jakobsarthur/maxent_disaggregation/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/jakobsarthur/maxent_disaggregation
 [pre-commit]: https://github.com/pre-commit/pre-commit
@@ -76,7 +76,10 @@ plot_samples_hist(samples,
 :alt: Histograms of the samples for both the disaggregate and aggregate values
 ```
 
+For more detailed description of the package, theory please see the [documentation page](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 
+## Reference
+If you find this package useful please share and cite our paper: [DOI]
 
 ## Contributing
 
