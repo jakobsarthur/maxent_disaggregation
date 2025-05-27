@@ -10,13 +10,13 @@ import numpy as np
 # best guess or mean of the total quantity (if available)
 mean_aggregate = 10
 # best guess of the standard deviation of the total quantity (if available)
-sd_aggregate = 1
+sd_aggregate = 0.3
 # min/max value of the total quantity (if applicable/available) (optional)
 min_aggregate = 0
 max_aggregate = np.inf
 # best guess values and uncertainties from proxy data if available (of not available put in np.nan)
 shares_disaggregates = [0.4, 0.25, 0.2, 0.15]
-sds_shares = [0.1, np.nan, 0.04, 0.001]
+sds_shares = [0.1, np.nan, 0.04, np.nan]
 
 # Now draw 10000 samples
 samples, _ = maxent_disagg(n=10000, 
@@ -39,6 +39,18 @@ plot_samples_hist(samples,
 ```
 ```{figure} data/Quickstart_example.svg
 :align: center
-:alt: Histograms of the samples for both the disaggregate and aggregate values.
+:alt: Histograms of the samples for both the disaggregate and aggregate quantities.
 Figure 1: Histograms of the samples for both the disaggregate and aggregate values. The dashed vertical lines indicate the means of the sampled distributions. The input values are given in the legend. 
+```
+
+```python
+# Plot the correlations between the disaggregates
+from maxent_disaggregation import plot_correlations
+plot_correlations(samples)
+```
+
+```{figure} data/Quickstart_example_correlations.svg
+:align: center
+:alt: Correlations of the samples for the disaggregate quantities.
+Figure 2: Correlations of the samples for the disaggregate quantities. The dashed vertical lines indicate the means and $\pm 1\sigma$ of the sampled distributions. The input values are given in the legend. 
 ```
