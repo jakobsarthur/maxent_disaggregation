@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import truncnorm, lognorm
 from .shares import sample_shares
 import matplotlib.pyplot as plt
+import corner
 
 
 def maxent_disagg(
@@ -249,6 +250,47 @@ def plot_samples_hist(
         title = "MaxEnt Disaggregation"
     plt.title(title)
 
+    if save:
+        if filename is None:
+            raise ValueError("Filename must be provided if save is True.")
+        plt.savefig(filename)
+    
+    plt.show()
+
+
+def plot_correlations(
+    samples,
+    title=None,
+    save=False,
+    filename=None,
+):
+    """
+    Plot correlations between samples.
+    :param samples: 2D array of samples
+    :param shares: list of shares for each sample
+    :param sds: list of standard deviations for each sample
+    """
+  
+    
+    corner.corner(samples,
+             labels=[f"Share {i+1}" for i in range(samples.shape[1])],
+             quantiles=[0.16, 0.5, 0.84],
+             show_titles=True,
+             title_kwargs={"fontsize": 12},
+             label_kwargs={"fontsize": 12},
+             smooth=True,
+             smooth1d=True,
+             fill_contours=False,
+             levels=(0.68, 0.95),
+             bins=50,
+             plot_datapoints=True,
+             color="C0",
+            )
+
+    if title==None:
+        title = "MaxEnt Disaggregation Correlations"
+    plt.suptitle(title, fontsize=16)
+    plt.tight_layout()
     if save:
         if filename is None:
             raise ValueError("Filename must be provided if save is True.")
