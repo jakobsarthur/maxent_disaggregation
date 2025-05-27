@@ -71,7 +71,7 @@ plot_samples_hist(samples,
                   shares=shares_disaggregates, 
                   sds=sds_shares)
 ```
-```{image} /docs/content/data/Quickstart_example.png
+```{image} /docs/content/data/Quickstart_example.svg
 :align: center
 :alt: Histograms of the samples for both the disaggregate and aggregate values
 ```
