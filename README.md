@@ -71,10 +71,9 @@ plot_samples_hist(samples,
                   shares=shares_disaggregates, 
                   sds=sds_shares)
 ```
-```{image} /docs/content/data/Quickstart_example.svg
-:align: center
-:alt: Histograms of the samples for both the disaggregate and aggregate values
-```
+
+[Histograms of the samples for both the disaggregate and aggregate values](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example.svg)
+
 
 For more detailed description of the package, theory please see the [documentation page](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 
