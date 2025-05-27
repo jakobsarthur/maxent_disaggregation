@@ -53,7 +53,7 @@ $Y_i$.
 
 To get estimates for the disaggregate flows, one usually looks for proxy
 data. Those proxy data are used to calculate shares (ratios/fractions)
-of the respective disaggregate units $\x_1, ..., \x_K$. To
+of the respective disaggregate units $x_1, ..., x_K$. To
 allocate the entire aggregate flow without leaving any residual (thus to
 respect the system balance), those fractions need to sum to one:
 
