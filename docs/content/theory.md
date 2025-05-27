@@ -13,7 +13,7 @@ disaggregates using proxy data. It is a common problem in many different
 research disciplines.
 
 
-```mermaid
+```{mermaid}
 flowchart-elk TD
     %% Define node classes
     classDef Aggregate fill:#eeeee4,color:black,stroke:none;
