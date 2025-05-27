@@ -145,6 +145,4 @@ flowchart-elk TD
     SDDecision -- "no" --> MaxEntDir
     SDDecision -- "yes" --> GenDir
     SDDecision -- "partially" --> NestedDir
-    NestedDir --> NestedDir2
-    NestedDir2 --> MeanDecision
 ```
