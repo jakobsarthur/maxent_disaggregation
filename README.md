@@ -35,20 +35,50 @@ You can install _maxent_disaggregation_ via `pip` from [PyPI](https://pypi.org/p
 $ pip install maxent_disaggregation
 ```
 
+The goal of `maxent_disaggregation` is to provide an easy to use `Python` tool 
+that helps you with uncertainty propagation when data disaggregation is involved. Data
+disaggregation usually involves splitting one data point $$Y_0$$ into $$K$$ 
+disaggregate quantities $Y_1, Y_2, ..., Y_K$$ using proxy data. It is a common 
+problem in many different research disciplines.
+
+
+```mermaid
+flowchart-elk TD
+    %% Define node classes
+    classDef Aggregate fill:#eeeee4,color:black,stroke:none;
+    classDef DisAgg1 fill:#abdbe3,color:black,stroke:none;
+    classDef DisAgg2 fill:#e28743,color:black,stroke:none;
+    classDef DisAgg3 fill:#abdbe3,color:black,stroke:none;
+
+    agg("Y_0"):::Aggregate
+    disagg1("Y_1=x_1 Y_0"):::DisAgg1
+    disagg2("Y_2=x_2 Y_0"):::DisAgg1
+    disagg3("Y_3=x_3 Y_0"):::DisAgg1
+   
+
+    %% Define connections
+    agg  --> disagg1
+    agg  --> disagg2
+    agg  --> disagg3
+```
+
+For more detailed description of the package, theory please see the [documentation page](https://maxent-disaggregation.readthedocs.io/en/latest/index.html). For a quickstart see below:
+
+
 ## Quick start
 
 ```python
 from maxent_disaggregation import maxent_disagg
 import numpy as np
 
-# best guess or mean of the total quantity (if available)
+# best guess or mean of the total quantity Y_0 (if available)
 mean_aggregate = 10
-# best guess of the standard deviation of the total quantity (if available)
+# best guess of the standard deviation of the total quantity Y_0 (if available)
 sd_aggregate = 1
-# min/max value of the total quantity (if applicable/available) (optional)
+# min/max value of the total quantity Y_o (if applicable/available) (optional)
 min_aggregate = 0
 max_aggregate = np.inf
-# best guess values and uncertainties from proxy data if available (of not available put in np.nan)
+# best guess values and uncertainties from proxy data for the shares (x_i) if available (of not available put in np.nan)
 shares_disaggregates = [0.4, 0.25, 0.2, 0.15]
 sds_shares = [0.1, np.nan, 0.04, 0.001]
 
@@ -75,48 +105,9 @@ plot_samples_hist(samples,
 ![Histograms of the samples for both the disaggregate and aggregate values](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example.svg)
 
 
-For more detailed description of the package, theory please see the [documentation page](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 
 
-```mermaid
-flowchart-elk TD
-    %% Define node classes
-    classDef decision fill:#e28743,color:black,stroke:none;
-    classDef distribution fill:#abdbe3,color:black,stroke:none;
-    classDef notimplementednode fill:#eeeee4,color:black,stroke:none;
 
-    MeanDecision{{"Best guess/
-    mean available?"}}:::decision
-    SDDecision{{"Standard deviation available?"}}:::decision
-    BoundsDecision1{{"Bounds available?"}}:::decision
-    Uniform("Uniform distribution on [a,b]"):::distribution
-    GoBackToStart["☠️ !Game Over!
-    We suggest to rethink your problem... 🤓"]:::notimplementednode
-    BoundsDecision2{{"Bounds available?"}}:::decision
-    Normal("Normal distribution"):::distribution
-    UnbiasedMean{{"Prefer unbiased mean?"}}:::decision
-    TruncNorm("Truncated Normal 
-    (Maximum Entropy distribution)"):::distribution
-    LogNorm("LogNormal distribution"):::distribution
-    LowerBound0{{"Lower bound = 0?"}}:::decision
-    Exponential("Exponential"):::distribution
-    NotImplemented["Not Implemented"]:::notimplementednode
-
-
-    %% Define connections
-    MeanDecision -- "no" --> BoundsDecision1
-    MeanDecision -- "yes" --> SDDecision
-    SDDecision -- "yes" --> BoundsDecision2
-    BoundsDecision2 -- "yes" --> UnbiasedMean
-    UnbiasedMean -- "yes" --> LogNorm
-    UnbiasedMean -- "no" --> TruncNorm
-    BoundsDecision2 -- "no" --> Normal
-    SDDecision -- "no" --> LowerBound0
-    LowerBound0 -- "yes" --> Exponential
-    LowerBound0 -- "no" --> NotImplemented
-    BoundsDecision1 -- "yes" --> Uniform
-    BoundsDecision1 -- "no" --> GoBackToStart
-```
 
 
 
