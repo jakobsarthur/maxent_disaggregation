@@ -38,7 +38,7 @@ $ pip install maxent_disaggregation
 The goal of `maxent_disaggregation` is to provide an easy to use `Python` tool 
 that helps you with uncertainty propagation when data disaggregation is involved. Data
 disaggregation usually involves splitting one data point $$Y_0$$ into $$K$$ 
-disaggregate quantities $Y_1, Y_2, ..., Y_K$$ using proxy data. It is a common 
+disaggregate quantities $$Y_1, Y_2, ..., Y_K$$ using proxy data. It is a common 
 problem in many different research disciplines.
 
 
