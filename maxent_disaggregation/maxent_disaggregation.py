@@ -195,7 +195,11 @@ def plot_samples_hist(
     sds=None,
     logscale=False,
     plot_agg=True,
+    plot_sample_mean=True,
     title=None,
+    xlabel=None,
+    ylabel=None,
+    legend_labels=None,
     save=False,
     filename=None,
 ):
@@ -205,6 +209,9 @@ def plot_samples_hist(
     :param shares: list of shares for each sample
     :param sds: list of standard deviations for each sample
     """
+
+    max_height = 0  # Track the maximum height of all histograms
+
     for i in range(samples.shape[1]):
         if sds is not None:
             std = sds[i]
@@ -214,38 +221,60 @@ def plot_samples_hist(
             share = shares[i]
         else:
             share = shares
+        if legend_labels is not None:
+            label = legend_labels[i]
+        else:
+            label = f"Share {i+1} input = {share}, SD = {std}"
         x = plt.hist(
             samples[:, i],
             bins=100,
             alpha=0.5,
-            label=f"Share {i+1} input = {share}, SD = {std}",
+            label=label,
             density=True,
         )
-        plt.axvline(
-            x=samples[:, i].mean(),
-            color=x[2][0].get_facecolor(),
-            linestyle="--",
-            label=f"Share {i+1} sample mean",
-        )
+        max_height = max(max_height, max(x[0]))  # Update the maximum height
+
+        if plot_sample_mean:
+            plt.axvline(
+                x=samples[:, i].mean(),
+                color=x[2][0].get_facecolor(),
+                linestyle="--",
+                label=f"Share {i+1} sample mean",
+            )
     if plot_agg:
+        if legend_labels is not None:
+            label = legend_labels[-1]
+        else:
+            label = f"Aggregate input= {mean_0}, SD = {sd_0}"
         x = plt.hist(
             samples.sum(axis=1),
             bins=100,
             alpha=0.5,
-            label=f"Aggregate input= {mean_0}, SD = {sd_0}",
+            label=label,
             density=True,
         )
-        plt.axvline(
-            x=samples.sum(axis=1).mean(),
-            color=x[2][0].get_facecolor(),
-            linestyle="--",
-            label="Aggregate sample mean",
-        )
+        max_height = max(max_height, max(x[0]))  # Update the maximum height
+        if plot_sample_mean:
+            plt.axvline(
+                x=samples.sum(axis=1).mean(),
+                color=x[2][0].get_facecolor(),
+                linestyle="--",
+                label="Aggregate sample mean",
+            )
+
     if logscale:
         plt.xscale("log")
-    plt.legend()
-    plt.ylabel("Probability density")
-    plt.xlabel("Value")
+    
+    # Set the y-axis limit slightly above the maximum height
+    plt.ylim(0, max_height * 1.1)
+
+    plt.legend(frameon=False, fontsize=8,)
+    if xlabel is None:
+        xlabel = "Value"
+    if ylabel is None:
+        ylabel = "Probability density"
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
     if title==None:
         title = "MaxEnt Disaggregation"
     plt.title(title)
@@ -261,6 +290,7 @@ def plot_samples_hist(
 def plot_covariances(
     samples,
     title=None,
+    labels=None,
     save=False,
     filename=None,
 ):
@@ -271,9 +301,11 @@ def plot_covariances(
     :param sds: list of standard deviations for each sample
     """
   
-    
+    if not labels:
+        labels = [f"Share {i+1}" for i in range(samples.shape[1])]
+
     corner.corner(samples,
-             labels=[f"Share {i+1}" for i in range(samples.shape[1])],
+             labels=labels,
              quantiles=[0.16, 0.5, 0.84],
              show_titles=True,
              title_kwargs={"fontsize": 12},
