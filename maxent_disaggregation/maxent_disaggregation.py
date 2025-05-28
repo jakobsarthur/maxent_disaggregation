@@ -11,8 +11,8 @@ def maxent_disagg(
     mean_0: float,
     shares: np.ndarray | list,
     sd_0: float = None,
-    min_0: float = None,
-    max_0: float = None,
+    min_0: float = 0,
+    max_0: float = np.inf,
     sds: np.ndarray | list = None,
     log: bool = True,
     grad_based: bool = False,
@@ -258,7 +258,7 @@ def plot_samples_hist(
     plt.show()
 
 
-def plot_correlations(
+def plot_covariances(
     samples,
     title=None,
     save=False,
@@ -288,7 +288,7 @@ def plot_correlations(
             )
 
     if title==None:
-        title = "MaxEnt Disaggregation Correlations"
+        title = "MaxEnt Disaggregation Covariances"
     plt.suptitle(title, fontsize=16)
     plt.tight_layout()
     if save:
