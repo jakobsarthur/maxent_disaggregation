@@ -190,7 +190,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "Open this Repo on GitHub",
-            "url": "https://github.comjakobsarthur/maxent_disaggregation",
+            "url": "https://github.com/jakobsarthur/maxent_disaggregation",
             "icon": "fab fa-brands fa-github",
         },
     ],
