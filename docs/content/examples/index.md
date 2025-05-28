@@ -13,4 +13,5 @@ The following notebooks provide some more detailed examples of how to use maxent
 maxdepth: 2
 ---
 notebooks/DifferentInInformationProvided
+notebooks/UseCaseExample
 ```
