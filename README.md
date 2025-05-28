@@ -102,9 +102,18 @@ plot_samples_hist(samples,
                   sds=sds_shares)
 ```
 
-![Histograms of the samples for both the disaggregate and aggregate values](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example.svg)
+![Histograms of the samples for both the disaggregate and aggregate values.](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example.svg)
 
 
+We can also easily plot the covariances between the different disaggrate quantities:
+
+```python
+# Plot the covariances between the disaggregates
+from maxent_disaggregation import plot_covariances
+plot_covariances(samples)
+```
+
+![Covariances of the samples for the disaggregate quantities.](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example_covariances.svg)
 
 
 

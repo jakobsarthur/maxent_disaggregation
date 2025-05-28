@@ -43,14 +43,17 @@ plot_samples_hist(samples,
 Figure 1: Histograms of the samples for both the disaggregate and aggregate values. The dashed vertical lines indicate the means of the sampled distributions. The input values are given in the legend. 
 ```
 
+
+We can also easily plot the covariances between the different disaggrate quantities:
+
 ```python
-# Plot the correlations between the disaggregates
-from maxent_disaggregation import plot_correlations
-plot_correlations(samples)
+# Plot the covariances between the disaggregates
+from maxent_disaggregation import plot_covariances
+plot_covariances(samples)
 ```
 
-```{figure} data/Quickstart_example_correlations.svg
+```{figure} data/Quickstart_example_covariances.svg
 :align: center
-:alt: Correlations of the samples for the disaggregate quantities.
-Figure 2: Correlations of the samples for the disaggregate quantities. The dashed vertical lines indicate the means and $\pm 1\sigma$ of the sampled distributions. The input values are given in the legend. 
+:alt: Covariances of the samples for the disaggregate quantities.
+Figure 2: Covariances of the samples for the disaggregate quantities. The dashed vertical lines indicate the means and $\pm 1\sigma$ of the sampled distributions. The input values are given in the legend. 
 ```
