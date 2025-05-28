@@ -227,7 +227,7 @@ def plot_samples_hist(
             label = f"Share {i+1} input = {share}, SD = {std}"
         x = plt.hist(
             samples[:, i],
-            bins=100,
+            bins=50,
             alpha=0.5,
             label=label,
             density=True,
@@ -248,7 +248,7 @@ def plot_samples_hist(
             label = f"Aggregate input= {mean_0}, SD = {sd_0}"
         x = plt.hist(
             samples.sum(axis=1),
-            bins=100,
+            bins=50,
             alpha=0.5,
             label=label,
             density=True,
@@ -268,7 +268,7 @@ def plot_samples_hist(
     # Set the y-axis limit slightly above the maximum height
     plt.ylim(0, max_height * 1.1)
 
-    plt.legend(frameon=False, fontsize=8,)
+    plt.legend(frameon=True, fontsize=8,)
     if xlabel is None:
         xlabel = "Value"
     if ylabel is None:
