@@ -199,6 +199,7 @@ def plot_samples_hist(
     title=None,
     xlabel=None,
     ylabel=None,
+    ylim=None,
     legend_labels=None,
     save=False,
     filename=None,
@@ -227,12 +228,12 @@ def plot_samples_hist(
             label = f"Share {i+1} input = {share}, SD = {std}"
         x = plt.hist(
             samples[:, i],
-            bins=50,
+            bins=100,
             alpha=0.5,
             label=label,
             density=True,
         )
-        max_height = max(max_height, max(x[0]))  # Update the maximum height
+        max_height = max(max_height, np.percentile(x[0],100))  # Update the maximum height
 
         if plot_sample_mean:
             plt.axvline(
@@ -248,12 +249,12 @@ def plot_samples_hist(
             label = f"Aggregate input= {mean_0}, SD = {sd_0}"
         x = plt.hist(
             samples.sum(axis=1),
-            bins=50,
+            bins=100,
             alpha=0.5,
             label=label,
             density=True,
         )
-        max_height = max(max_height, max(x[0]))  # Update the maximum height
+        max_height = max(max_height, np.percentile(x[0],100))  # Update the maximum height
         if plot_sample_mean:
             plt.axvline(
                 x=samples.sum(axis=1).mean(),
@@ -266,7 +267,10 @@ def plot_samples_hist(
         plt.xscale("log")
     
     # Set the y-axis limit slightly above the maximum height
-    plt.ylim(0, max_height * 1.1)
+    if not ylim:
+        plt.ylim(0, max_height * 1.01)
+    else:
+        plt.ylim(ylim)
 
     plt.legend(frameon=True, fontsize=8,)
     if xlabel is None:
