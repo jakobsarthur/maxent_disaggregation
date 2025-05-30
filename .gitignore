@@ -1,3 +1,7 @@
+# dev tools
+/notebooks/dev/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
