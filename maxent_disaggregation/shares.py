@@ -23,9 +23,10 @@ def generalized_dirichlet(n, shares, sds):
 
     Parameters:
     ------------
-    n (int): Number of samples to generate.
-    shares (array-like): best-guess (mean) values for the shares. Must sum to 1!y.
-    sds (array-like): Array of standard deviations for the shares.
+        n (int): Number of samples to generate.
+        shares (array-like): best-guess (mean) values for the shares. 
+            Must sum to 1!y.
+        sds (array-like): Array of standard deviations for the shares.
 
     Returns:
     ------------
@@ -147,18 +148,13 @@ def sample_shares(
     - If both means and standard deviations are provided for all shares, the generalized
       Dirichlet distribution is used.
     - If only means are provided, the maximum entropy Dirichlet distribution is used.
+    - If no means are provided, a uniform Dirichlet distribution is used.
     - If a mix of known and unknown means/standard deviations is provided, a hierarchical
-      approach is used to sample the shares.
+      approach is used to sample the shares (function called `nested_dirichlet`).
     - The function raises warnings if standard deviations are provided without corresponding
       mean values, as this is not recommended.
 
-    Raises:
-    ------
-    ValueError
-        If `na_action` is not "fill" or "remove".
-        If the shares do not sum to 1 and `na_action` is not set to "fill".
-    AssertionError
-        If the resulting sample shape does not match the expected dimensions.
+    
     """
     gamma_par = None  # set default value for gamma_par
 
@@ -445,7 +441,38 @@ def check_sample_means_and_sds(
         )
 
 
-def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
+def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):    
+    """
+    Generate random samples from independent Beta distributions with specified means (shares) and standard deviations (sds), ensuring that the sum of samples across columns does not exceed 1 for each row.
+
+    Parameters
+    ----------
+    n : int
+        Number of samples to generate.
+    shares : array-like
+        Array of mean values (between 0 and 1) for each Beta distribution.
+    sds : array-like
+        Array of standard deviations for each Beta distribution.
+    fix : bool, optional (default=True)
+        If True, automatically adjust invalid variance values to the maximum allowed for the given mean. If False, raise a ValueError when invalid parameter combinations are detected.
+    max_iter : int, optional (default=1e3)
+        Maximum number of iterations to attempt resampling rows where the sum exceeds 1.
+
+    Returns
+    -------
+    x : ndarray
+        An (n, k) array of samples, where k is the length of `shares`, such that each row sums to less than or equal to 1.
+
+    Raises
+    ------
+    ValueError
+        If the provided standard deviation is too large for the given mean (unless `fix=True`), or if a valid sample cannot be generated within `max_iter` iterations.
+
+    Notes
+    -----
+    The function ensures that for each sample (row), the sum across all Beta-distributed variables does not exceed 1 by resampling as needed.
+    
+    """
     var = sds**2
     undef_comb = (shares * (1 - shares)) < var
     if not np.all(~undef_comb):

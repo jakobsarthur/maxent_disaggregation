@@ -205,10 +205,48 @@ def plot_samples_hist(
     filename=None,
 ):
     """
-    Plot histograms of samples.
-    :param samples: 2D array of samples
-    :param shares: list of shares for each sample
-    :param sds: list of standard deviations for each sample
+    Plot histograms of sample distributions, optionally including aggregate and sample means.
+    Parameters:
+        samples (np.ndarray):
+            2D array of shape (n_samples, n_disaggregates) containing the samples to plot.
+        mean_0 (float, optional):
+            Mean of the aggregate distribution for labeling purposes.
+        sd_0 (float, optional):
+            Standard deviation of the aggregate distribution for labeling purposes.
+        shares (list or np.ndarray, optional):
+            List of share values for each disaggregate, used for labeling.
+        sds (list or np.ndarray, optional):
+            List of standard deviations for each disaggregate, used for labeling.
+        logscale (bool, optional):
+            If True, use a logarithmic scale for the x-axis. Default is False.
+        plot_agg (bool, optional):
+            If True, plot the histogram of the aggregate (sum across disaggregates). Default is True.
+        plot_sample_mean (bool, optional):
+            If True, plot vertical lines for the mean of each sample and the aggregate. Default is True.
+        title (str, optional):
+            Title for the plot. If None, a default title is used.
+        xlabel (str, optional):
+            Label for the x-axis. If None, defaults to "Value".
+        ylabel (str, optional):
+            Label for the y-axis. If None, defaults to "Probability density".
+        ylim (tuple, optional):
+            Tuple specifying y-axis limits (min, max). If None, limits are set automatically.
+        legend_labels (list of str, optional):
+            Custom labels for the legend for each disaggregate and the aggregate.
+        save (bool, optional):
+            If True, save the plot to a file specified by `filename`. Default is False.
+        filename (str, optional):
+            Path to save the plot if `save` is True.
+    Raises:
+        ValueError: If `save` is True and `filename` is not provided.
+    Notes:
+        - Each disaggregate's histogram is plotted with its own color and label.
+        - The aggregate histogram (sum across disaggregates) is plotted if `plot_agg` is True.
+        - Sample means are indicated with dashed vertical lines if `plot_sample_mean` is True.
+        - The function uses matplotlib for plotting and will display the plot unless `save` is True.
+
+
+    
     """
 
     max_height = 0  # Track the maximum height of all histograms
@@ -299,10 +337,28 @@ def plot_covariances(
     filename=None,
 ):
     """
-    Plot correlations between samples.
-    :param samples: 2D array of samples
-    :param shares: list of shares for each sample
-    :param sds: list of standard deviations for each sample
+    Plot the covariance matrix of the samples using corner plots.
+    Parameters
+    ----------
+        samples : np.ndarray
+            2D array of shape (n_samples, n_disaggregates) containing the samples to plot. 
+        title : str, optional
+            Title for the plot. If None, a default title is used.
+        labels : list of str, optional
+            Custom labels for each disaggregate. If None, defaults to "Share 1", "Share 2", etc.
+        save : bool, optional
+            If True, save the plot to a file specified by `filename`. Default is False.
+        filename : str, optional 
+            Path to save the plot if `save` is True.
+    Raises
+    ------
+        ValueError: If `save` is True and `filename` is not provided.
+    
+    Notes
+    -----
+    - The function uses the `corner` library to create a corner plot of the samples.
+    
+    
     """
   
     if not labels:

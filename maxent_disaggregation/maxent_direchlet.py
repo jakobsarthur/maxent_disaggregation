@@ -16,6 +16,11 @@ def dirichlet_entropy_derivative(gamma_par, shares):
 
     Returns:
     - derivative of entropy with respect to gamma_par
+
+
+    Notes:
+    - NOT TESTED yet.
+    
     """
     print("Entropy derative funtion being used!")
     alpha = gamma_par * np.array(shares)
