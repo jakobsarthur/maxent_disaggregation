@@ -33,8 +33,8 @@ dependencies = [
     "scipy",
     "numpy",
     "nlopt",
-    "matplotlib"
-    "corner"
+    "matplotlib",
+    "corner",
     # dependencies as strings with quotes, e.g. "foo"
     # You can add version requirements like "foo>2.0"
 ]
