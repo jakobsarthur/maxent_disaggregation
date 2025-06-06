@@ -133,14 +133,14 @@ flowchart-elk TD
     SDDecision{{"Standard deviation available?"}}:::decision
     MaxEntDir("Maximum Entropy Dirichlet"):::distribution
     GenDir("Generalised Dirichlet"):::distribution
-    NestedDir("Nested Dirichlet"):::distribution
+    hybridDir("Hybrid Dirichlet"):::distribution
     UniformDir("Uniform Dirichlet"):::distribution
     
     %% Define connections
     MeanDecision -- "no" --> UniformDir
     MeanDecision -- "yes" --> SDDecision
-    MeanDecision -- "paritially" --> NestedDir
+    MeanDecision -- "paritially" --> hybridDir
     SDDecision -- "no" --> MaxEntDir
     SDDecision -- "yes" --> GenDir
-    SDDecision -- "partially" --> NestedDir
+    SDDecision -- "partially" --> hybridDir
 ```

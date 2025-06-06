@@ -24,7 +24,7 @@ def generalized_dirichlet(n, shares, sds):
     Parameters:
     ------------
         n (int): Number of samples to generate.
-        shares (array-like): best-guess (mean) values for the shares. 
+        shares (array-like): best-guess (mean) values for the shares.
             Must sum to 1!y.
         sds (array-like): Array of standard deviations for the shares.
 
@@ -37,7 +37,7 @@ def generalized_dirichlet(n, shares, sds):
 
     shares = np.asarray(shares)
     sds = np.asarray(sds)
-    if not np.isclose(shares.sum(),1):
+    if not np.isclose(shares.sum(), 1):
         raise ValueError("The shares must sum to 1. Please check your input values.")
     if not np.all(np.isfinite(sds)):
         raise ValueError(
@@ -150,11 +150,11 @@ def sample_shares(
     - If only means are provided, the maximum entropy Dirichlet distribution is used.
     - If no means are provided, a uniform Dirichlet distribution is used.
     - If a mix of known and unknown means/standard deviations is provided, a hierarchical
-      approach is used to sample the shares (function called `nested_dirichlet`).
+      approach is used to sample the shares (function called `hybrid_dirichlet`).
     - The function raises warnings if standard deviations are provided without corresponding
       mean values, as this is not recommended.
 
-    
+
     """
     gamma_par = None  # set default value for gamma_par
 
@@ -191,8 +191,8 @@ def sample_shares(
         return sample, None
 
     else:
-        # If we have a mix of known and unknown shares, we handle this case using the nested Dirichlet logic.
-        sample = nested_dirichlet(shares=shares, size=n, sds=sds)
+        # If we have a mix of known and unknown shares, we handle this case using the Hybrid Dirichlet logic.
+        sample = hybrid_dirichlet(shares=shares, size=n, sds=sds)
 
     # check if sample means and standard deviations deviate more than the threshold values:
     check_sample_means_and_sds(
@@ -206,7 +206,7 @@ def sample_shares(
     return sample, gamma_par
 
 
-def nested_dirichlet(
+def hybrid_dirichlet(
     shares,
     size=None,
     sds=None,
@@ -216,8 +216,8 @@ def nested_dirichlet(
     **kwargs,
 ):
     """
-    Function to sample in the case of partial mean and sd information using a nested
-    Dirichlet logic with iterative bias correction. Samples are generated
+    Function to sample in the case of partial mean and sd information using a hybrid
+    Dirichlet distribution with iterative bias correction. Samples are generated
     from a combination of beta distributions for shares with both mean and sd,
     and a maximum-entropy Dirichlet distribution for shares with only mean values.
     This function iteratively adjusts the standard deviations of shares that
@@ -441,7 +441,7 @@ def check_sample_means_and_sds(
         )
 
 
-def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):    
+def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
     """
     Generate random samples from independent Beta distributions with specified means (shares) and standard deviations (sds), ensuring that the sum of samples across columns does not exceed 1 for each row.
 
@@ -471,7 +471,7 @@ def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
     Notes
     -----
     The function ensures that for each sample (row), the sum across all Beta-distributed variables does not exceed 1 by resampling as needed.
-    
+
     """
     var = sds**2
     undef_comb = (shares * (1 - shares)) < var
