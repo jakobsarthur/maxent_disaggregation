@@ -1,6 +1,50 @@
+"""
+This module provides functions for sampling from Dirichlet and generalized Dirichlet distributions,
+as well as hybrid approaches, given specified means (shares) and standard deviations (sds) for the shares.
+It supports maximum entropy Dirichlet sampling, bias correction, and robust handling of edge cases such as
+missing or partially specified parameters.
+
+Functions
+---------
+- generalized_dirichlet(n, shares, sds):
+    Generate random samples from a Generalised Dirichlet distribution with given shares and standard deviations.
+
+- dirichlet_max_ent(n, shares, **kwargs):
+    Generate samples from a Dirichlet distribution with maximum entropy given input shares.
+
+- sample_shares(n, shares, sds=None, grad_based=False, threshold_shares=0.1, threshold_sd=0.2, **kwargs):
+    This is the main function which handles all the different cases and samples from a distribution of
+    shares based on given means and standard deviations, using the appropriate distribution or a hybrid
+    approach depending on the completeness of the input information.
+
+- hybrid_dirichlet(shares, size=None, sds=None, max_rel_bias=0.10, max_iter_bias_fix=20, max_iter_beta_sampling=1e3, **kwargs):
+    Sample shares in the case of partial mean and sd information using a hybrid Dirichlet distribution with
+    iterative bias correction.
+
+- sample_dirichlet(shares, size=None, gamma_par=None, threshold_dirichlet=0.01, force_nonzero_samples=True, **kwargs):
+    Wrapper to sample from a Dirichlet distribution with given shares and gamma concentration parameter,
+    with pragmatic handling of small shape parameters to avoid numerical issues.
+
+- check_sample_means_and_sds(sample, shares, sds, threshold_shares=0.1, threshold_sd=0.2):
+    Check if the sample means and standard deviations deviate more than the specified thresholds from the
+    specified shares and standard deviations, raising warnings if so.
+
+- sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
+    Generate random samples from independent Beta distributions with specified means and standard deviations,
+    ensuring that the sum of samples across columns does not exceed 1 for each row.
+
+- The module is robust to missing or partially specified input parameters, using uniform priors or hybrid
+  approaches as needed.
+- Warnings are raised if input parameters are inconsistent or if generated samples deviate significantly
+  from specified means or standard deviations.
+- The module is intended for probabilistic modeling of compositional data, such as branching ratios or shares
+  that sum to one.
+
+"""
+
 import warnings
 import numpy as np
-from scipy.stats import dirichlet, gamma, beta
+from scipy.stats import gamma
 import scipy.stats as stats
 from .maxent_direchlet import find_gamma_maxent, dirichlet_entropy
 
@@ -99,7 +143,6 @@ def sample_shares(
     n: int,
     shares: np.ndarray | list,
     sds: np.ndarray | list = None,
-    max_iter: int = 1e3,
     grad_based: bool = False,
     threshold_shares: float = 0.1,
     threshold_sd: float = 0.2,
@@ -120,8 +163,6 @@ def sample_shares(
         Array or list of mean values for the shares. These should sum to 1 if fully specified.
     sds : np.ndarray | list, optional
         Array or list of standard deviations for the shares. If not provided, defaults to NaN.
-    max_iter : float, optional
-        Maximum number of iterations for optimization algorithms. Default is 1e3.
     grad_based : bool, optional
         Whether to use gradient-based optimization for maximum entropy Dirichlet sampling.
         Default is False.
@@ -321,14 +362,14 @@ def sample_dirichlet(
 
     It differs from the default Dirichlet distroibution in that when the
 
-    For each variable $$i$$ whose mean value ($$\alpha_i = \gamma_{par} \cdot share_i$$)
+    For each variable i whose mean value (alpha_i = gamma_par * share_i)
     that is below a `threshold`, a fallback parametrization of the Gamma distribution
     (which is used for sampling from the Dirichlet distribution) is applied to avoid
     zero or near-zero sampling. This is especially useful for very
     small shape parameters, which can cause numerical issues in in the dirichlet sampling.
     The following pragmatic workaround is used that sets:
-        - $$\eqn{\alpha_i = 1}$$ (shape) for shares below `threshold`
-        - $$\eqn{rate = 1 / \alpha_i}$$ ensuring less extreme values.
+        - alpha_i = 1 (shape) for shares below `threshold`
+        - rate = 1 / alpha_i ensuring less extreme values.
 
     For more details, see the discussion in [rgamma()] under "small shape values" and
     the references there. This approach helps mitigate issues where numeric precision

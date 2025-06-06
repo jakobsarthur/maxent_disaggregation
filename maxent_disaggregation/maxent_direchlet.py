@@ -1,3 +1,25 @@
+
+"""
+This module provides functions for working with the entropy of the Dirichlet distribution,
+including computing the entropy, its derivative with respect to a scaling parameter, and
+finding the gamma parameter that maximizes the entropy given a set of shares.
+Functions:
+----------
+- dirichlet_entropy_derivative(gamma_par, shares):
+    Computes the derivative of the entropy of the Dirichlet distribution with respect to
+    the scaling parameter gamma_par, assuming the concentration parameters alpha are
+    proportional to the shares.
+- dirichlet_entropy(gamma_par, shares):
+    Computes the negative entropy of a Dirichlet distribution with concentration parameters
+    defined as gamma_par * shares.
+- find_gamma_maxent(
+      eval_f: Callable = dirichlet_entropy,
+    given a set of shares, using the NLopt library for optimization.
+- The module assumes that the shares provided sum to 1.
+- The optimization in `find_gamma_maxent` can be performed with or without gradients.
+- The module relies on numpy, scipy, and nlopt libraries.
+"""
+
 import numpy as np
 from scipy.special import polygamma, psi
 from scipy.stats import dirichlet
@@ -70,7 +92,6 @@ def find_gamma_maxent(
     shares_lb: float = 0,
     eval_grad_f: Callable = dirichlet_entropy_derivative,
     grad_based: bool = False,
-    **kwargs,
     ) -> float:
     """
     Finds the gamma parameter that maximizes the entropy of a Dirichlet distribution 
