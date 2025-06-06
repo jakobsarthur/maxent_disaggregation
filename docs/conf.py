@@ -177,7 +177,7 @@ html_sidebars = {
 
 html_theme_options = {
     # page elements
-    "announcement": "⚠️ BETA VERSION ⚠️ This is a beta version of the maxent_disaggregation package. It is not yet fully tested and may contain bugs. Use at your own risk.",
+    # "announcement": "⚠️ BETA VERSION ⚠️ This is a beta version of the maxent_disaggregation package. It is not yet fully tested and may contain bugs. Use at your own risk.",
     "navbar_start": ["navbar-logo"],
     "navbar_end": ["theme-switcher", "navbar-icon-links.html"],
     "navbar_align": "content",
