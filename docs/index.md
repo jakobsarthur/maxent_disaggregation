@@ -11,7 +11,9 @@
 This package enables you to account for:
 - **Disaggregate data** into multiple data via estimates of the relative shares
 - **Propagate the uncertainty** from the raw data to the disaggregate samples (even in the case of missing data)
-- **Preserve statistical correlation** due to disaggregating data 
+- **Preserve statistical correlation** due to disaggregating data
+- **Plot the sampled distributions** with a one function call
+- **Plot the covariance** of the samples
 
 
 
