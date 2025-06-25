@@ -1,6 +1,19 @@
 # dev tools
 /notebooks/dev/
 
+__pycache__
+export
+.idea
+.ipynb_checkpoints
+.DS_Store
+.vscode/
+conda/
+conda-out/
+docs_local/
+jupyter_execute/
+
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
