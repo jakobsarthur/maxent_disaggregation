@@ -15,7 +15,7 @@ Here is a list of important resources for contributors:
 [Source Code]: https://github.com/jakobsarthur/maxent_disaggregation
 [Documentation]: https://maxent_disaggregation.readthedocs.io/
 [Issue Tracker]: https://github.com/jakobsarthur/maxent_disaggregation/issues
-[Code of Conduct]: CODE_OF_CONDUCT.md
+[Code of Conduct]: ./CODE_OF_CONDUCT.md
 
 ## How to report a bug
 
