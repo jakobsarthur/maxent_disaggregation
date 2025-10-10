@@ -4,6 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maxent_disaggregation"
+version = "1.0.1"
+license = {text = "MIT"}
 authors = [
   { name="Arthur Jakobs", email="artos.jakobs@psi.ch" },
   { name="Simon Schulte", email="simonsc@plan.aau.dk" }
