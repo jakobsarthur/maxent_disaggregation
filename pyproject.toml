@@ -30,13 +30,13 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering"
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.14"
 dependencies = [
     "scipy",
     "numpy",
     "nlopt",
     "matplotlib",
-    "corner",
+    "corner",    
     # dependencies as strings with quotes, e.g. "foo"
     # You can add version requirements like "foo>2.0"
 ]
@@ -63,6 +63,16 @@ dev = [
     "pytest-cov",
     "pytest-randomly",
     "setuptools",
+]
+notebooks = [
+    "jupyterlab",
+    "ipykernel",
+    "matplotlib",
+    "corner",
+    "numpy",
+    "scipy",
+    "pandas",
+    "seaborn"
 ]
 
 [tool.setuptools]
