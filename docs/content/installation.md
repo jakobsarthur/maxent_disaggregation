@@ -29,8 +29,6 @@ pip install corner
 ```
 
 
-
-
 ### Option 2: Install in a existing `Conda environment`:
 1. Activate `your_conda_environment`
 ```console
@@ -40,4 +38,9 @@ conda activate your_conda_environment
 2. Install maxent_disaggregation
 ```console
 conda install -c jakobs maxent_disaggregation
+```
+
+3. If you want to run the example notebooks with the correlation plots, then run:
+```console
+pip install corner
 ```
