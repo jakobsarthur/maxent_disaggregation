@@ -7,7 +7,6 @@ export
 .ipynb_checkpoints
 .DS_Store
 .vscode/
-conda/
 conda-out/
 docs_local/
 jupyter_execute/
