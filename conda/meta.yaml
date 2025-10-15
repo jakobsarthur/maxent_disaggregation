@@ -20,20 +20,19 @@ requirements:
                 - python
                 - setuptools
         host:
-                - python
+                - python>=3.9, <3.14
+                - pip
+                - numpy
+                - scipy
+                - nlopt
+        run:
+                - python>=3.9, <3.14
                 - pip
                 - numpy
                 - scipy
                 - matplotlib
                 - nlopt
-                - corner
-        run:
-                - python>=3.9
-                - numpy
-                - scipy
-                - matplotlib
-                - nlopt
-                - corner
+        
 
 about:
         home: https://github.com/jakobsarthur/maxent_disaggregation
