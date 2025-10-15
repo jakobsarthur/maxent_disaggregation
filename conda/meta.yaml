@@ -13,7 +13,7 @@ package:
         version: {{ version }}
 
 source:
-        path: ../
+        git_url: ../
 
 requirements:
         build:
