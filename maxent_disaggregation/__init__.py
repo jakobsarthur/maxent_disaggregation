@@ -18,4 +18,4 @@ __all__ = (
     # Add functions and variables you want exposed in `maxent_disaggregation.` namespace here
 )
 
-__version__ = "1.0.3"
+__version__ = "1.0.5"
