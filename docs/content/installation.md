@@ -4,9 +4,16 @@
 
 
 ## Installation via `pip` 
+1. Install maxent_disaggregation:
 ```console
 pip install maxent_disaggregation
 ```
+
+2. If you want to run the example notebooks and have the plotting options, run:
+```console
+pip install maxent_disaggregation [notebooks] 
+```
+
 
 ## Installation via `Conda`
 
@@ -25,6 +32,7 @@ conda activate maxent_disaggregation
 
 3. If you want to run the example notebooks with the correlation plots, then run:
 ```console
+conda install matplotlib seaborn
 pip install corner
 ```
 
@@ -42,5 +50,6 @@ conda install -c jakobs maxent_disaggregation
 
 3. If you want to run the example notebooks with the correlation plots, then run:
 ```console
+conda install matplotlib seaborn
 pip install corner
 ```
