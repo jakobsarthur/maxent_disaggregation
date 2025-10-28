@@ -3,11 +3,12 @@
 ```{button-link} https://github.com/jakobsarthur/maxent_disaggregation
 :color: info
 :expand:
-💡 maxent_disaggregation is a **python** package to help with uncertainty propagation in the case of disaggregating data.
+💡 maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
 ```
 ```{button-link} https://github.com/simschul/MaxentDisaggregation
+:color: warning
 :expand:
-💡 Click here for the **R version** of the package!
+💡 This is a python package. Click here for the **R version** of the package!
 ```
 
 
