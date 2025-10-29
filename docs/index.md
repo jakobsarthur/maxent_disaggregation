@@ -7,7 +7,7 @@
 ```{button-link} https://github.com/simschul/MaxentDisaggregation
 :color: info 
 :expand:
-💡 This is a python package. Click here for the **R version** of the package!
+ This is a ![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python). Click here for the **R version** of the package!
 ```
 
 
