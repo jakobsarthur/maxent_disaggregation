@@ -2,13 +2,11 @@
 # maxent_disaggregation
 ---------------------------------------------
 
-💡 maxent_disaggregation is a package to help with uncertainty propagation in the case of disaggregating data.
+💡 maxent_disaggregation is a [![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://github.com/jakobsarthur/maxent_disaggregation) to help with uncertainty propagation in the case of disaggregating data.
 
-```{button-link} https://github.com/simschul/MaxentDisaggregation
-:color: info 
-:expand:
- This is a ![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python). Click here for the **R version** of the package!
-```
+
+➡ Click here for the [![R Package](https://img.shields.io/badge/R-Package-orange?style=for-the-badge&logo=r)](https://github.com/simschul/MaxentDisaggregation) of the package!
+
 
 
 ## ✨ Features
