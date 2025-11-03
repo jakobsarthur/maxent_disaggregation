@@ -1,6 +1,6 @@
 # Installation
 
-`maxent_disaggregation` is an open source Python software package. It's available via [`pip`](https://pypi.org/project/pip/) and [`anaconda`](https://anaconda.org). 
+`maxent_disaggregation` is an open source Python software package. It's available via [`pip`](https://pypi.org/project/pip/) and [`anaconda`](https://anaconda.org). The basic installation only comes with the sampling. To install the plotting functionality see instruction below:
 
 
 ## Installation via `pip` 

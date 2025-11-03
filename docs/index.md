@@ -2,7 +2,15 @@
 # maxent_disaggregation
 ---------------------------------------------
 
-💡 maxent_disaggregation is a [![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://github.com/jakobsarthur/maxent_disaggregation) to help with uncertainty propagation in the case of disaggregating data.
+💡 maxent_disaggregation is a [![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://github.com/jakobsarthur/maxent_disaggregation) designed to help with uncertainty propagation in the case of disaggregating data. More in general, the package can be used for correlated sampling of shares (quanitites that sum up to a fixed but possible uncertain total), even if only limited or
+partial information of the data is availaible. The package closely follows the ``Maximum Entropy`` principle, 
+to provide unbiased sampling, using all available information. Sounds complicated? The package does the hard work for you! Simply put in the information that you have and sample away!
+
+Check out these docs to:
+
+- Have a [Quick Start](./content/usage.md)
+- See [How it works...](./content/theory.md)
+- See [Example notebooks](./content/examples/index.md)
 
 
 ➡ Click here for the [![R Package](https://img.shields.io/badge/R-Package-orange?style=for-the-badge&logo=r)](https://github.com/simschul/MaxentDisaggregation) of the package!
