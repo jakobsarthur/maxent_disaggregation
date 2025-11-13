@@ -139,7 +139,7 @@ flowchart-elk TD
     %% Define connections
     MeanDecision -- "no" --> UniformDir
     MeanDecision -- "yes" --> SDDecision
-    MeanDecision -- "paritially" --> hybridDir
+    MeanDecision -- "partially" --> hybridDir
     SDDecision -- "no" --> MaxEntDir
     SDDecision -- "yes" --> GenDir
     SDDecision -- "partially" --> hybridDir
