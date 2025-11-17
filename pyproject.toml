@@ -35,7 +35,6 @@ dependencies = [
     "scipy",
     "numpy",
     "nlopt",
-    "stable_trunc_gaussian",
     # dependencies as strings with quotes, e.g. "foo"
     # You can add version requirements like "foo>2.0"
 ]
