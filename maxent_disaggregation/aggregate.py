@@ -94,7 +94,7 @@ def sample_aggregate(
 
 
 
-def sample_truncnorm(obs_mean, obs_std, a, b, size=1000):
+def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
     """
     Draw random samples from a truncated normal distribution
     given observed mean, standard deviation, and bounds.
@@ -107,8 +107,10 @@ def sample_truncnorm(obs_mean, obs_std, a, b, size=1000):
         Observed standard deviation used to infer the underlying normal distribution's scale.
     a : float
         Lower truncation bound (expressed in the same units as obs_mean/obs_std).
+        If None, defaults to 0.
     b : float
         Upper truncation bound (expressed in the same units as obs_mean/obs_std).
+        If None, defaults to infinity.
     size : int, optional
         Number of random samples to draw. Default is 1000.
 
@@ -130,6 +132,10 @@ def sample_truncnorm(obs_mean, obs_std, a, b, size=1000):
     >>> samples = sample_truncnorm(10.0, 2.0, 5.0, 15.0, size=500)
     >>> samples.shape(500,)
     """
+    if a is None:
+        a = 0
+    if b is None:
+        b = np.inf
     mu, sigma, alpha, beta = estimate_truncnormparams(obs_mean, obs_std, a, b)
     return truncnorm.rvs(alpha, beta, loc=mu, scale=sigma, size=size)
 
