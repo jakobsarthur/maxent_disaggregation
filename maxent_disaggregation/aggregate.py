@@ -1,6 +1,6 @@
 from scipy.stats import truncnorm, lognorm
 import warnings
-
+import numpy as np
 
 
 def sample_aggregate(
