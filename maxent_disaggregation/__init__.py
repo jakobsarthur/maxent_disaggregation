@@ -3,7 +3,6 @@
 from .shares import sample_shares
 from .aggregate import sample_aggregate
 from .maxent_disaggregation import maxent_disagg
-from .maxent_disaggregation import sample_aggregate
 from .maxent_disaggregation import plot_samples_hist, plot_covariances
 from .maxent_direchlet import find_gamma_maxent
 
