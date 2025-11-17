@@ -79,7 +79,7 @@ based on the principle of Maximum Entropy (MaxEnt):
 
 
 ```{mermaid}
-flowchart-elk LR
+flowchart-elk TD
     MeanDecision{{"Best guess/
     mean available?"}} -- no --> BoundsDecision1{{"Bounds available?"}}
     MeanDecision -- yes --> SDDecision{{"Standard deviation available?"}}
@@ -120,7 +120,7 @@ flowchart-elk LR
 
 
 ```{mermaid}
-flowchart-elk LR
+flowchart-elk TD
     %% Define node classes
     classDef decision fill:#e28743,color:black,stroke:none;
     classDef distribution fill:#abdbe3,color:black,stroke:none;
