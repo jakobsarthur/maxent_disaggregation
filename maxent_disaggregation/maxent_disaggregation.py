@@ -47,8 +47,9 @@ def maxent_disagg(
     log:
         If True, the lognormal distribution is used for the aggregate value when a mean
         and a standard deviation are provided. If False, samples are drawn from a truncated
-        normal distribution, which is the maximum entropy solution but produces a biased mean.
-        Default is True
+        normal distribution with optimised Gaussian parameters to fit the observed mean and standard deviation. 
+        Note that this is the general maximum entropy solution for bounded data. 
+        Default is True to use lognormal.
 
     Returns
     -------
