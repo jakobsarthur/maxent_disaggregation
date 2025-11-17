@@ -87,14 +87,20 @@ def maxent_disagg(
         raise ValueError("sd_0 should be non-negative, or None/NA if not available.")
     if sd_0 == 0:
         raise ValueError("sd_0 should be positive, or None/NA if not available.")
+    
 
-    # The code below is only necessary if we want to accept arrays as input
-    # if sd_0 is not None:
-    #     if not type(mean_0)==type(sd_0)==type(min)==type(max):
-    #         raise ValueError('All arguments should be of the same type.')
-    # else:
-    #     if not type(mean_0)==type(min)==type(max):
-    #         raise ValueError('All arguments should be of the same type.')
+
+    # Checks on min and max
+    if min_0 >= max_0:
+        raise ValueError("min_0 should be less than max_0.")
+    if min_0 is None:
+        min_0 = -np.inf
+    if max_0 is None:
+        max_0 = np.inf
+    
+    if mean_0 < min_0 or mean_0 > max_0:
+        raise ValueError("mean_0 should be between min_0 and max_0.")
+
 
     samples_agg = sample_aggregate(
         n=n, mean=mean_0, sd=sd_0, low_bound=min_0, high_bound=max_0, log=log
