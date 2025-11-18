@@ -50,14 +50,13 @@ def sample_aggregate(
         and (high_bound == np.inf or high_bound is None)
     ):
         # Normal distribution
-        return np.random.normal(loc=mean, scale=sd, size=n)
+        sample = np.random.normal(loc=mean, scale=sd, size=n)
 
     # Truncated normal or lognormal
     elif mean is not None and sd is not None:
         if log == False:
             # Truncated normal from observed parameters
             sample = sample_truncnorm(mean, sd, low_bound, high_bound, size=n)
-            return sample
         else:
             # use lognormal
             if low_bound < 0:
@@ -72,7 +71,7 @@ def sample_aggregate(
             # Lognormal distribution
             sigma = np.sqrt(np.log(1 + (sd / mean) ** 2))
             mu = np.log(mean) - 0.5 * sigma**2
-            return lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
+            sample = lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
 
     elif (
         mean is not None
@@ -81,7 +80,7 @@ def sample_aggregate(
         and (high_bound == np.inf or high_bound is None)
     ):
         # Exponential
-        return np.random.exponential(scale=mean, size=n)
+        sample = np.random.exponential(scale=mean, size=n)
     elif (
         mean is None
         and sd is None
@@ -89,7 +88,7 @@ def sample_aggregate(
         and np.isfinite(high_bound)
     ):
         # Uniform
-        return np.random.uniform(low=low_bound, high=high_bound, size=n)
+        sample = np.random.uniform(low=low_bound, high=high_bound, size=n)
     elif mean is not None and sd is None and low_bound not in [0, None]:
         raise ValueError(
             "Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment."
@@ -102,7 +101,10 @@ def sample_aggregate(
         raise ValueError(
             "Combination of inputs not implemented. Please check the input values."
         )
-
+    # Check sample vs input
+    check_sample_vs_input(
+        mean=mean, sd=sd, low_bound=low_bound, high_bound=high_bound, samples=sample)
+    return sample
 
 def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
     """
@@ -247,3 +249,61 @@ def estimate_truncnormparams(
     beta_opt = (b - mu_opt) / sigma_opt
 
     return mu_opt, sigma_opt, alpha_opt, beta_opt
+
+
+def check_sample_vs_input(
+    mean,
+    sd,
+    low_bound,
+    high_bound,
+    samples,
+    threshold_shares=0.05,
+    threshold_sd=0.2,
+):
+    """
+    Check if the sample mean and standard deviation are close to the input values.
+    This function is useful for validating the sampling process.
+
+    Parameters
+    ----------
+    mean : float
+        The input mean value.
+    sd : float
+        The input standard deviation value.
+    low_bound : float
+        The lower bound used in sampling.
+    high_bound : float
+        The upper bound used in sampling.
+    samples : numpy.ndarray
+        The array of sampled values.
+    threshold_shares : float, optional
+        The relative tolerance for mean comparison. Default is 0.1 (10%).
+    threshold_sd : float, optional
+        The relative tolerance for standard deviation comparison. Default is 0.2 (20%).
+
+    Returns
+    -------
+    None
+    Warnings are printed if the sample statistics deviate significantly from the input values.
+    """
+
+    sample_mean = samples.mean()
+    sample_sd = samples.std()
+
+    if not np.isclose(sample_mean, mean, rtol=threshold_shares):
+        warnings.warn(
+            f"Sample mean {sample_mean:.2f} deviates from input mean {mean:.2f} by more than {threshold_shares*100:.1f}%."
+        )
+
+    if not np.isclose(sample_sd, sd, rtol=threshold_sd):
+        warnings.warn(
+            f"Sample standard deviation {sample_sd:.2f} deviates from input standard deviation {sd:.2f} by more than {threshold_sd*100:.1f}%."
+        )
+    if low_bound is not None and samples.min() < low_bound:
+        raise ValueError(
+            f"Sample minimum {samples.min():.2f} is below the lower bound {low_bound:.2f}."
+        )
+    if high_bound is not None and samples.max() > high_bound:
+        raise ValueError(
+            f"Sample maximum {samples.max():.2f} is above the upper bound {high_bound:.2f}."
+        )
