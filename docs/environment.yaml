@@ -12,6 +12,7 @@ dependencies:
   - ipython
   # sphinx
   - sphinx=7.3.7 # core builder # https://anaconda.org/conda-forge/sphinx/files
+  - astroid=3.3.11
   # theme and extensions
   - pydata-sphinx-theme=0.15.3 # website theme # https://anaconda.org/conda-forge/pydata-sphinx-theme/files
   - myst-parser=3.0.1 # Markdown support # https://anaconda.org/conda-forge/myst-parser/files
@@ -25,7 +26,6 @@ dependencies:
   - sphinx-copybutton=0.5.2 # for copy button in code blocks # https://anaconda.org/conda-forge/sphinx-copybutton/files
   # build process
   - sphinx-autobuild=2024.4.16 # live-html support # https://anaconda.org/conda-forge/sphinx-autobuild/files
-  # package dependencies (required for sphinx-autoapi to import and document the package)
-  - numpy
-  - scipy
-  - pip  # required for ReadTheDocs build jobs
+  - pip
+  - pip:
+    - sphinx-carousel==1.2.0 # for carousel support # https://pypi.org/project/sphinx-carousel/

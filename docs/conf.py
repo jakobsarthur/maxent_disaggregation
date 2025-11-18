@@ -49,8 +49,8 @@ extensions = [
 ## autoapi configuration ################################################
 ## https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html#customisation-options
 
-autoapi_type = 'python'
 autoapi_dirs = ['../maxent_disaggregation']
+autoapi_type = 'python'
 autoapi_options = [
     'members',
     'undoc-members',
@@ -63,7 +63,7 @@ autoapi_options = [
 autoapi_python_class_content = 'both'
 autoapi_member_order = 'bysource'
 autoapi_root = 'content/api'
-# autoapi_template_dir = "_templates/autoapi_templates/"  # Commented out - not using custom templates
+autoapi_template_dir = "_templates/autoapi_templates/"
 autoapi_keep_files = False
 
 autoapi_ignore = [
