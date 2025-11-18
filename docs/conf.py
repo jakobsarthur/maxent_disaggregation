@@ -63,7 +63,7 @@ autoapi_options = [
 autoapi_python_class_content = 'both'
 autoapi_member_order = 'bysource'
 autoapi_root = 'content/api'
-autoapi_template_dir = "_templates/autoapi_templates/"
+# autoapi_template_dir = "_templates/autoapi_templates/"  # Commented out - not using custom templates
 autoapi_keep_files = False
 
 autoapi_ignore = [

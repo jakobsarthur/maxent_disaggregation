@@ -28,6 +28,4 @@ dependencies:
   # package dependencies (required for sphinx-autoapi to import and document the package)
   - numpy
   - scipy
-  - pip
-  - pip:
-    - -e ..
+  - pip  # required for ReadTheDocs build jobs
