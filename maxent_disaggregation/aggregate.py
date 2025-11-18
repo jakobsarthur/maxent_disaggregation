@@ -262,7 +262,8 @@ def check_sample_vs_input(
 ):
     """
     Check if the sample mean and standard deviation are close to the input values.
-    This function is useful for validating the sampling process.
+    Raise warnings if the mean and standard deviation deviate beyond specified thresholds.
+    Raise a ValueError if samples fall outside the specified bounds.
 
     Parameters
     ----------
@@ -277,14 +278,15 @@ def check_sample_vs_input(
     samples : numpy.ndarray
         The array of sampled values.
     threshold_shares : float, optional
-        The relative tolerance for mean comparison. Default is 0.1 (10%).
+        The relative tolerance for mean comparison. Default is 0.05 (5%).
     threshold_sd : float, optional
         The relative tolerance for standard deviation comparison. Default is 0.2 (20%).
 
     Returns
     -------
     None
-    Warnings are printed if the sample statistics deviate significantly from the input values.
+    - Warnings are printed if the sample statistics deviate significantly from the input values for the mean or standard deviation.
+    - Raises ValueError if samples fall outside the specified bounds.
     """
 
     sample_mean = samples.mean()
