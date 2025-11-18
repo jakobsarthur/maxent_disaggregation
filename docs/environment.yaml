@@ -25,3 +25,9 @@ dependencies:
   - sphinx-copybutton=0.5.2 # for copy button in code blocks # https://anaconda.org/conda-forge/sphinx-copybutton/files
   # build process
   - sphinx-autobuild=2024.4.16 # live-html support # https://anaconda.org/conda-forge/sphinx-autobuild/files
+  # package dependencies (required for sphinx-autoapi to import and document the package)
+  - numpy
+  - scipy
+  - pip
+  - pip:
+    - -e ..
