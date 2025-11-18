@@ -51,7 +51,7 @@ def sample_aggregate(
     ):
         # Normal distribution
         return np.random.normal(loc=mean, scale=sd, size=n)
-    
+
     # Truncated normal or lognormal
     elif mean is not None and sd is not None:
         if log == False:
@@ -74,7 +74,12 @@ def sample_aggregate(
             mu = np.log(mean) - 0.5 * sigma**2
             return lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
 
-    elif mean is not None and sd is None and low_bound == 0 and (high_bound == np.inf or high_bound is None):
+    elif (
+        mean is not None
+        and sd is None
+        and low_bound == 0
+        and (high_bound == np.inf or high_bound is None)
+    ):
         # Exponential
         return np.random.exponential(scale=mean, size=n)
     elif (
@@ -86,12 +91,17 @@ def sample_aggregate(
         # Uniform
         return np.random.uniform(low=low_bound, high=high_bound, size=n)
     elif mean is not None and sd is None and low_bound not in [0, None]:
-        raise ValueError("Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment.")
+        raise ValueError(
+            "Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment."
+        )
     elif mean is not None and sd is None and np.isfinite(high_bound):
-        raise ValueError("Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment.")
+        raise ValueError(
+            "Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment."
+        )
     else:
-        raise ValueError("Combination of inputs not implemented. Please check the input values.")
-
+        raise ValueError(
+            "Combination of inputs not implemented. Please check the input values."
+        )
 
 
 def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
@@ -136,11 +146,35 @@ def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
         a = 0
     if b is None:
         b = np.inf
+
+    # Checks on min and max
+    if a >= b:
+        raise ValueError("a should be less than b.")
+    if a is None:
+        a = -np.inf
+    if b is None:
+        b = np.inf
+
+    if obs_mean < a or obs_mean > b:
+        raise ValueError("obs_mean should be between a and b.")
+
+    # Check Bhatia–Davis inequality
+    sigma_bd = np.sqrt((b - obs_mean) * (obs_mean - a))
+    if obs_std > sigma_bd:
+        warnings.warn(
+            f"Observed standard deviation exceeds the Bhatia–Davis inequality bound."
+            f"The inputs are inconsistent: obs_std must be less than or equal to {sigma_bd:.2f}."
+            f" Adjusting obs_std to {sigma_bd:.2f}."
+        )
+        obs_std = sigma_bd
+
     mu, sigma, alpha, beta = estimate_truncnormparams(obs_mean, obs_std, a, b)
     return truncnorm.rvs(alpha, beta, loc=mu, scale=sigma, size=size)
 
 
-def estimate_truncnormparams(obs_mean, obs_std, a, b, mu_init=None, sigma_init=None):
+def estimate_truncnormparams(
+    obs_mean, obs_std, a, b, mu_init=None, sigma_init=None, mean_weight=10
+):
     """
     Estimate the Gaussian  parameters of a truncated normal distribution given observed
     statistics. This function finds the parameters (mu, sigma) of a truncated normal
@@ -160,7 +194,10 @@ def estimate_truncnormparams(obs_mean, obs_std, a, b, mu_init=None, sigma_init=N
         Initial guess for the location parameter (mu). Defaults to obs_mean.
     sigma_init : float, optional
         Initial guess for the scale parameter (sigma). Defaults to obs_std.
-    
+    mean_weight : float, optional
+        Weighting factor for the mean relative to the standard deviation in the optimization objective.
+        Higher values prioritize matching the mean more closely. Default is 10. Adjust as needed.
+
     Returns
     -------
     mu_opt : float
@@ -171,40 +208,42 @@ def estimate_truncnormparams(obs_mean, obs_std, a, b, mu_init=None, sigma_init=N
         Standardized lower truncation bound: (a - mu_opt) / sigma_opt.
     beta_opt : float
         Standardized upper truncation bound: (b - mu_opt) / sigma_opt.
-    
+
     Notes
     -----
     The function uses least squares optimization to minimize the difference between
     the theoretical and observed moments of the truncated normal distribution.
-    The scale parameter (sigma) is constrained to be positive (>= 1e-10).
-    
+    The scale parameter (sigma) is optimized in logscale to ensure positivity
+    without boundary issues.
+
     Examples
     --------
     >>> mu, sigma, alpha, beta = estimate_truncnormparams(5.0, 1.5, 0, 10)
     >>> print(f"Estimated mu: {mu:.2f}, sigma: {sigma:.2f}")
     """
 
-    
     def objective(params):
-        mu, sigma = params
+        mu, log_sigma = params
+        sigma = np.exp(log_sigma)
+
         alpha = (a - mu) / sigma
         beta = (b - mu) / sigma
         tn = truncnorm(alpha, beta, loc=mu, scale=sigma)
-        return [tn.mean() - obs_mean, tn.std() - obs_std]
-    
+        return [mean_weight * (tn.mean() - obs_mean), tn.std() - obs_std]
+
     if mu_init is None:
         mu_init = obs_mean
     if sigma_init is None:
         sigma_init = obs_std
 
     res = least_squares(
-        objective, 
-        x0=[mu_init, sigma_init],
-        bounds=([-np.inf, 1e-10], [np.inf, np.inf])
+        objective,
+        x0=[mu_init, np.log(sigma_init)],
     )
-    
-    mu_opt, sigma_opt = res.x
+
+    mu_opt, log_sigma_opt = res.x
+    sigma_opt = np.exp(log_sigma_opt)
     alpha_opt = (a - mu_opt) / sigma_opt
     beta_opt = (b - mu_opt) / sigma_opt
-    
+
     return mu_opt, sigma_opt, alpha_opt, beta_opt
