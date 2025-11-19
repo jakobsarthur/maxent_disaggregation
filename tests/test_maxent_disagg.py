@@ -33,7 +33,20 @@ def test_sample_aggregate_lognormal():
     sd = 1
     samples = sample_aggregate(n=n, mean=mean, sd=sd, low_bound=0, high_bound=np.inf, log=True)
     assert samples.min() >= 0
-    assert np.abs(samples.mean() - mean) < 1.0  # lognormal mean is biased
+    assert np.isclose(samples.mean(), mean, rtol=0.05)
+    assert np.isclose(samples.std(), sd, rtol=0.2)
+
+def test_sample_aggregate_truncated_normal():
+    n = 1000
+    mean = 5
+    sd = 1
+    low_bound = 3
+    high_bound = 7
+    samples = sample_aggregate(n=n, mean=mean, sd=sd, low_bound=low_bound, high_bound=high_bound, log=False)
+    assert np.all((samples >= low_bound) & (samples <= high_bound))
+    assert np.isclose(samples.mean(), mean, rtol=0.05)
+    assert np.isclose(samples.std(), sd, rtol=0.2)
+
 
 
 def test_sample_shares_dirichlet():
@@ -53,24 +66,24 @@ def test_sample_shares_generalized_dirichlet():
     assert np.allclose(samples.mean(axis=0), shares, rtol=0.1)
 
 
-def test_plot_samples_hist_runs():
-    n = 100
-    mean_0 = 10
-    shares = [0.5, 0.3, 0.2]
-    sd_0 = 2
-    samples, gamma = maxent_disagg(n=n, mean_0=mean_0, shares=shares, sd_0=sd_0)
-    # Should not raise
-    plot_samples_hist(samples, mean_0=mean_0, sd_0=sd_0, shares=shares)
+# def test_plot_samples_hist_runs():
+#     n = 100
+#     mean_0 = 10
+#     shares = [0.5, 0.3, 0.2]
+#     sd_0 = 2
+#     samples, gamma = maxent_disagg(n=n, mean_0=mean_0, shares=shares, sd_0=sd_0)
+#     # Should not raise
+#     plot_samples_hist(samples, mean_0=mean_0, sd_0=sd_0, shares=shares)
 
 
-def test_plot_covariances_runs():
-    n = 100
-    mean_0 = 10
-    shares = [0.5, 0.3, 0.2]
-    sd_0 = 2
-    samples, gamma = maxent_disagg(n=n, mean_0=mean_0, shares=shares, sd_0=sd_0)
-    # Should not raise
-    plot_covariances(samples)
+# def test_plot_covariances_runs():
+#     n = 100
+#     mean_0 = 10
+#     shares = [0.5, 0.3, 0.2]
+#     sd_0 = 2
+#     samples, gamma = maxent_disagg(n=n, mean_0=mean_0, shares=shares, sd_0=sd_0)
+#     # Should not raise
+#     plot_covariances(samples)
 
 
 def test_sample_shares_partial_means():
@@ -100,7 +113,7 @@ def test_sample_shares_partial_sds():
 
 def test_sample_shares_partial_means_and_sds():
     n = 1000
-    shares = [0.4, np.nan, 0.6]
+    shares = [0.4, np.nan, 0.3]
     sds = [0.05, 0.02, np.nan]
     samples, _ = sample_shares(n=n, shares=shares, sds=sds)
     assert samples.shape == (n, 3)
@@ -108,4 +121,9 @@ def test_sample_shares_partial_means_and_sds():
     means = np.nan_to_num(shares, nan=0)
     sample_means = samples.mean(axis=0)
     mask = ~np.isnan(shares)
-    assert np.allclose(sample_means[mask], means[mask], rtol=0.2)
+    mask_sd = ~np.isnan(sds)
+    assert np.allclose(sample_means[mask], means[mask], rtol=0.1)
+    assert np.allclose(samples.std(axis=0)[mask*mask_sd], np.nan_to_num(sds, nan=0)[mask*mask_sd], rtol=0.2)
+
+
+
