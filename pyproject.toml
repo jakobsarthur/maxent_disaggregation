@@ -50,6 +50,7 @@ tracker = "https://github.com/jakobsarthur/maxent_disaggregation/issues"
 testing = [
     "maxent_disaggregation",
     "matplotlib",
+    "corner",
     "pytest",
     "pytest-cov",
     "python-coveralls"
