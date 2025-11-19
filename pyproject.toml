@@ -49,6 +49,7 @@ tracker = "https://github.com/jakobsarthur/maxent_disaggregation/issues"
 # seems to work, at least for now
 testing = [
     "maxent_disaggregation",
+    "matplotlib",
     "pytest",
     "pytest-cov",
     "python-coveralls"

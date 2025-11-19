@@ -90,7 +90,7 @@ def test_sample_shares_partial_means():
     n = 1000
     # Partial means: one missing (np.nan)
     shares = [0.5, 0.3, np.nan]
-    sds = [0.05, 0.04, 0.03]
+    sds = [0.2, 0.1, np.nan]
     samples, _ = sample_shares(n=n, shares=shares, sds=sds)
     assert samples.shape == (n, 3)
     # Only check means for non-nan shares
