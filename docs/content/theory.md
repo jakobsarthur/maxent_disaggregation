@@ -93,7 +93,8 @@ flowchart-elk TD
     BoundsDecision2 -- no --> Normal("Normal distribution")
     SDDecision -- no --> LowerBound0{{"Lower bound = 0?"}}
     LowerBound0 -- yes --> Exponential("Exponential distribution")
-    LowerBound0 -- no --> NotImplemented["Not Implemented"]
+    LowerBound0 -- no --> NotImplemented["No MaxEnt solution
+    (currently not implemented)"]
     BoundsDecision1 -- yes --> Uniform("Uniform distribution on [a,b]")
     BoundsDecision1 -- no --> GoBackToStart["☠️ !Game Over!
     We suggest to rethink your problem... 🤓"]
