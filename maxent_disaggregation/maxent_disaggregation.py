@@ -18,6 +18,7 @@ def maxent_disagg(
     return_shares: bool = False,
     return_aggregate: bool = False,
     max_iter: int = 1e3,
+    suppress_warnings: bool = False,
     **kwargs,
 ) -> np.ndarray:
     """
@@ -50,6 +51,9 @@ def maxent_disagg(
         normal distribution with optimised Gaussian parameters to fit the observed mean and standard deviation. 
         Note that this is the general maximum entropy solution for bounded data. 
         Default is True to use lognormal.
+    suppress_warnings : bool, optional
+        If True, suppress warnings about sample means and standard deviations deviating
+        from the specified values. Default is False.
 
     Returns
     -------
@@ -104,7 +108,8 @@ def maxent_disagg(
 
 
     samples_agg = sample_aggregate(
-        n=n, mean=mean_0, sd=sd_0, low_bound=min_0, high_bound=max_0, log=log
+        n=n, mean=mean_0, sd=sd_0, low_bound=min_0, high_bound=max_0, log=log,
+        suppress_warnings=suppress_warnings,
     )
     samples_shares, gamma = sample_shares(
         n=n,
@@ -112,6 +117,7 @@ def maxent_disagg(
         sds=sds,
         grad_based=grad_based,
         max_iter=max_iter,
+        suppress_warnings=suppress_warnings,
         **kwargs,
     )
     # Check if the shares sum to 1

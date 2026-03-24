@@ -11,6 +11,7 @@ def sample_aggregate(
     low_bound: float = 0,
     high_bound: float = np.inf,
     log: bool = True,
+    suppress_warnings: bool = False,
 ) -> np.ndarray:
     """
 
@@ -35,6 +36,9 @@ def sample_aggregate(
         and a standard deviation are provided. If False, samples are drawn from a truncated
         normal distribution, which is the maximum entropy solution but produces a biased mean.
         Default is True
+    suppress_warnings : bool, optional
+        If True, suppress warnings about sample statistics deviating from input values.
+        Default is False.
     """
 
     # harmonize input of sd
@@ -103,7 +107,8 @@ def sample_aggregate(
         )
     # Check sample vs input
     check_sample_vs_input(
-        mean=mean, sd=sd, low_bound=low_bound, high_bound=high_bound, samples=sample)
+        mean=mean, sd=sd, low_bound=low_bound, high_bound=high_bound, samples=sample,
+        suppress_warnings=suppress_warnings)
     return sample
 
 def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
@@ -259,6 +264,7 @@ def check_sample_vs_input(
     samples,
     threshold_shares=0.05,
     threshold_sd=0.2,
+    suppress_warnings=False,
 ):
     """
     Check if the sample mean and standard deviation are close to the input values.
@@ -281,6 +287,9 @@ def check_sample_vs_input(
         The relative tolerance for mean comparison. Default is 0.05 (5%).
     threshold_sd : float, optional
         The relative tolerance for standard deviation comparison. Default is 0.2 (20%).
+    suppress_warnings : bool, optional
+        If True, suppress warnings about sample statistics deviating from input values.
+        Default is False.
 
     Returns
     -------
@@ -292,14 +301,18 @@ def check_sample_vs_input(
     sample_mean = samples.mean()
     sample_sd = samples.std()
 
-    if not np.isclose(sample_mean, mean, rtol=threshold_shares):
+    if not np.isclose(sample_mean, mean, rtol=threshold_shares) and not suppress_warnings:
         warnings.warn(
-            f"Sample mean {sample_mean:.2f} deviates from input mean {mean:.2f} by more than {threshold_shares*100:.1f}%."
+            f"Sample mean {sample_mean:.2f} deviates from input mean {mean:.2f} "
+            f"by more than {threshold_shares*100:.1f}%.\n"
+            f"To suppress this warning, set suppress_warnings=True or increase threshold_shares."
         )
 
-    if not np.isclose(sample_sd, sd, rtol=threshold_sd):
+    if not np.isclose(sample_sd, sd, rtol=threshold_sd) and not suppress_warnings:
         warnings.warn(
-            f"Sample standard deviation {sample_sd:.2f} deviates from input standard deviation {sd:.2f} by more than {threshold_sd*100:.1f}%."
+            f"Sample standard deviation {sample_sd:.2f} deviates from input standard deviation {sd:.2f} "
+            f"by more than {threshold_sd*100:.1f}%.\n"
+            f"To suppress this warning, set suppress_warnings=True or increase threshold_sd."
         )
     if low_bound is not None and samples.min() < low_bound:
         raise ValueError(

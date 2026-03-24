@@ -25,7 +25,7 @@ Functions
     Wrapper to sample from a Dirichlet distribution with given shares and gamma concentration parameter,
     with pragmatic handling of small shape parameters to avoid numerical issues.
 
-- check_sample_means_and_sds(sample, shares, sds, threshold_shares=0.1, threshold_sd=0.2):
+- check_sample_means_and_sds(sample, shares, sds, threshold_shares=0.1, threshold_sd=0.2, suppress_warnings=False):
     Check if the sample means and standard deviations deviate more than the specified thresholds from the
     specified shares and standard deviations, raising warnings if so.
 
@@ -146,6 +146,7 @@ def sample_shares(
     grad_based: bool = False,
     threshold_shares: float = 0.1,
     threshold_sd: float = 0.2,
+    suppress_warnings: bool = False,
     **kwargs,
 ):
     """
@@ -174,6 +175,9 @@ def sample_shares(
         Threshold for the relative difference between the sample standard deviation and
         the specified sds. If the difference exceeds this threshold, a warning is raised.
         Default is 0.2 (20%).
+    suppress_warnings : bool, optional
+        If True, suppress warnings about sample means and standard deviations deviating
+        from the specified values. Default is False.
     **kwargs : dict
         Additional keyword arguments passed to the underlying sampling functions.
 
@@ -242,6 +246,7 @@ def sample_shares(
         sds,
         threshold_shares=threshold_shares,
         threshold_sd=threshold_sd,
+        suppress_warnings=suppress_warnings,
     )
 
     return sample, gamma_par
@@ -428,6 +433,7 @@ def check_sample_means_and_sds(
     sds,
     threshold_shares=0.1,
     threshold_sd=0.2,
+    suppress_warnings=False,
 ):
     """
     Check if the sample means and standard deviations deviate more than the specified thresholds
@@ -446,6 +452,8 @@ def check_sample_means_and_sds(
     threshold_sd : float, optional
         The threshold for the relative difference between the sample standard deviation and the specified sds.
         If the difference exceeds this threshold, a warning is raised. Default is 0.2 (20%).
+    suppress_warnings : bool, optional
+        If True, suppress all warnings from this function. Default is False.
     """
     if not isinstance(sample, np.ndarray):
         raise TypeError("Sample must be a numpy array.")
@@ -460,25 +468,27 @@ def check_sample_means_and_sds(
     diff_sd = np.abs(sample_sd - sds) / sds
     means_above_threshold = diff_mean > threshold_shares
     indices_above_threshold = np.where(means_above_threshold)[0]
-    if np.any(means_above_threshold):
+    if np.any(means_above_threshold) and not suppress_warnings:
         warnings.warn(
-            f"The generated samples for the shares have a mean that is more than {threshold_shares*100}% different from the specified shares. Please check your inputs. Reasons for this could be large relative uncertainties for the shares, or a small number of samples. To surpress this warning you can set a higher threshold_shares."
-        )
-        print(
-            f"Shares above threshold: {diff_mean[means_above_threshold]},\
-             shares: {shares[means_above_threshold]}, sample_mean: {sample_mean[means_above_threshold]},\
-             indices: {indices_above_threshold}"
+            f"The generated samples for the shares have a mean that is more than {threshold_shares*100}% different from the specified shares. "
+            f"Please check your inputs. Reasons for this could be large relative uncertainties for the shares, or a small number of samples. "
+            f"To suppress this warning you can set suppress_warnings=True or set a higher threshold_shares.\n"
+            f"Shares above threshold: {diff_mean[means_above_threshold]}\n"
+            f"Shares: {shares[means_above_threshold]}\n"
+            f"Sample mean: {sample_mean[means_above_threshold]}\n"
+            f"Indices: {indices_above_threshold}"
         )
     sds_above_threshold = diff_sd > threshold_sd
     indices_above_threshold = np.where(sds_above_threshold)[0]
-    if np.any(sds_above_threshold):
+    if np.any(sds_above_threshold) and not suppress_warnings:
         warnings.warn(
-            f"The generated samples for the shares have a standard deviation that is more than {threshold_sd*100}% different from the specified sd's. Please note that the specified sd's might be incompetibale with the other constraints. Please check your inputs. To surpress this warning you can set a higher threshold_sd."
-        )
-        print(
-            f"Sds above threshold: {diff_sd[sds_above_threshold]},\
-             sds: {sds[sds_above_threshold]}, sample_sd: {sample_sd[sds_above_threshold]},\
-             indices: {indices_above_threshold}"
+            f"The generated samples for the shares have a standard deviation that is more than {threshold_sd*100}% different from the specified sd's. "
+            f"Please note that the specified sd's might be incompatible with the other constraints. "
+            f"Please check your inputs. To suppress this warning you can set suppress_warnings=True or set a higher threshold_sd.\n"
+            f"Sds above threshold: {diff_sd[sds_above_threshold]}\n"
+            f"Sds: {sds[sds_above_threshold]}\n"
+            f"Sample sd: {sample_sd[sds_above_threshold]}\n"
+            f"Indices: {indices_above_threshold}"
         )
 
 
