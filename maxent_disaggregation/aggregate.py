@@ -12,6 +12,7 @@ def sample_aggregate(
     high_bound: float = np.inf,
     log: bool = True,
     suppress_warnings: bool = False,
+    seed: int = None,
 ) -> np.ndarray:
     """
 
@@ -39,7 +40,11 @@ def sample_aggregate(
     suppress_warnings : bool, optional
         If True, suppress warnings about sample statistics deviating from input values.
         Default is False.
+    seed : int, optional
+        Random seed for reproducibility. Default is None.
     """
+
+    rng = np.random.default_rng(seed)
 
     # harmonize input of sd
     if sd is not None and np.isnan(sd):
@@ -54,13 +59,13 @@ def sample_aggregate(
         and (high_bound == np.inf or high_bound is None)
     ):
         # Normal distribution
-        sample = np.random.normal(loc=mean, scale=sd, size=n)
+        sample = rng.normal(loc=mean, scale=sd, size=n)
 
     # Truncated normal or lognormal
     elif mean is not None and sd is not None:
         if log == False:
             # Truncated normal from observed parameters
-            sample = sample_truncnorm(mean, sd, low_bound, high_bound, size=n)
+            sample = sample_truncnorm(mean, sd, low_bound, high_bound, size=n, seed=rng)
         else:
             # use lognormal
             if low_bound < 0:
@@ -75,7 +80,7 @@ def sample_aggregate(
             # Lognormal distribution
             sigma = np.sqrt(np.log(1 + (sd / mean) ** 2))
             mu = np.log(mean) - 0.5 * sigma**2
-            sample = lognorm.rvs(s=sigma, scale=np.exp(mu), size=n)
+            sample = lognorm.rvs(s=sigma, scale=np.exp(mu), size=n, random_state=rng)
 
     elif (
         mean is not None
@@ -84,7 +89,7 @@ def sample_aggregate(
         and (high_bound == np.inf or high_bound is None)
     ):
         # Exponential
-        sample = np.random.exponential(scale=mean, size=n)
+        sample = rng.exponential(scale=mean, size=n)
     elif (
         mean is None
         and sd is None
@@ -92,7 +97,7 @@ def sample_aggregate(
         and np.isfinite(high_bound)
     ):
         # Uniform
-        sample = np.random.uniform(low=low_bound, high=high_bound, size=n)
+        sample = rng.uniform(low=low_bound, high=high_bound, size=n)
     elif mean is not None and sd is None and low_bound not in [0, None]:
         raise ValueError(
             "Case with mean, no sd, and non-zero lower bound, or non-finite high bound is not implemented at the moment."
@@ -111,7 +116,7 @@ def sample_aggregate(
         suppress_warnings=suppress_warnings)
     return sample
 
-def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
+def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000, seed=None):
     """
     Draw random samples from a truncated normal distribution
     given observed mean, standard deviation, and bounds.
@@ -176,7 +181,8 @@ def sample_truncnorm(obs_mean, obs_std, a=None, b=None, size=1000):
         obs_std = sigma_bd
 
     mu, sigma, alpha, beta = estimate_truncnormparams(obs_mean, obs_std, a, b)
-    return truncnorm.rvs(alpha, beta, loc=mu, scale=sigma, size=size)
+    rng = np.random.default_rng(seed)
+    return truncnorm.rvs(alpha, beta, loc=mu, scale=sigma, size=size, random_state=rng)
 
 
 def estimate_truncnormparams(

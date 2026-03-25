@@ -52,7 +52,7 @@ from .maxent_direchlet import find_gamma_maxent, dirichlet_entropy
 warnings.simplefilter("always", UserWarning)
 
 
-def generalized_dirichlet(n, shares, sds):
+def generalized_dirichlet(n, shares, sds, seed=None):
     """
     Generate random samples from a Generalised Dirichlet distribution
     with given shares and standard deviations.
@@ -107,14 +107,15 @@ def generalized_dirichlet(n, shares, sds):
     alpha2 = (shares / sds) ** 2
     beta2 = shares / (sds) ** 2
     k = len(alpha2)
+    rng = np.random.default_rng(seed)
     x = np.zeros((n, k))
     for i in range(k):
-        x[:, i] = gamma.rvs(alpha2[i], scale=1 / beta2[i], size=n)
+        x[:, i] = gamma.rvs(alpha2[i], scale=1 / beta2[i], size=n, random_state=rng)
     sample = x / x.sum(axis=1, keepdims=True)
     return sample
 
 
-def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
+def dirichlet_max_ent(n: int, shares: np.ndarray | list, seed=None, **kwargs):
     """
     Generate samples from a Dirichlet distribution with maximum entropy.
     This function computes the gamma parameter that maximizes the entropy
@@ -135,7 +136,7 @@ def dirichlet_max_ent(n: int, shares: np.ndarray | list, **kwargs):
     """
 
     gamma_par = find_gamma_maxent(shares, eval_f=dirichlet_entropy, **kwargs)
-    sample = sample_dirichlet(shares * gamma_par, size=n, **kwargs)
+    sample = sample_dirichlet(shares * gamma_par, size=n, seed=seed, **kwargs)
     return sample, gamma_par
 
 
@@ -147,6 +148,7 @@ def sample_shares(
     threshold_shares: float = 0.1,
     threshold_sd: float = 0.2,
     suppress_warnings: bool = False,
+    seed: int = None,
     **kwargs,
 ):
     """
@@ -178,6 +180,8 @@ def sample_shares(
     suppress_warnings : bool, optional
         If True, suppress warnings about sample means and standard deviations deviating
         from the specified values. Default is False.
+    seed : int, optional
+        Random seed for reproducibility. Default is None.
     **kwargs : dict
         Additional keyword arguments passed to the underlying sampling functions.
 
@@ -221,23 +225,23 @@ def sample_shares(
 
     if np.all(have_both):
         # use generalized dirichlet
-        sample = generalized_dirichlet(n, shares, sds)
+        sample = generalized_dirichlet(n, shares, sds, seed=seed)
     elif np.all(have_mean_only):
         # maximize entropy for dirichlet
         sample, gamma_par = dirichlet_max_ent(
-            n, shares, grad_based=grad_based, **kwargs
+            n, shares, grad_based=grad_based, seed=seed, **kwargs
         )
     elif np.isfinite(shares).sum() == 0:
         # no information on the shares, use uniform dirichlet
         shares = np.asarray([1 / len(shares)] * len(shares))
         # The maximum entropy concentration parameter for a uniform Dirichlet distribution is gammapar = K
-        sample = sample_dirichlet(shares=shares, gamma_par=K, size=n)
+        sample = sample_dirichlet(shares=shares, gamma_par=K, size=n, seed=seed)
         # break out because it does not need to check the means and sd's
         return sample, None
 
     else:
         # If we have a mix of known and unknown shares, we handle this case using the Hybrid Dirichlet logic.
-        sample = hybrid_dirichlet(shares=shares, size=n, sds=sds)
+        sample = hybrid_dirichlet(shares=shares, size=n, sds=sds, seed=seed)
 
     # check if sample means and standard deviations deviate more than the threshold values:
     check_sample_means_and_sds(
@@ -259,6 +263,7 @@ def hybrid_dirichlet(
     max_rel_bias=0.10,
     max_iter_bias_fix=20,
     max_iter_beta_sampling=1e3,
+    seed=None,
     **kwargs,
 ):
     """
@@ -304,12 +309,18 @@ def hybrid_dirichlet(
         # fill the unkown means with a uniform prior
         shares[np.isnan(shares)] = (1 - np.nansum(shares)) / np.isnan(shares).sum()
 
+    rng = np.random.default_rng(seed)
+
     iter_count = 0
     while iter_count < max_iter_bias_fix:
         iter_count += 1
         sample = np.zeros((size, K))
         have_both = np.isfinite(shares) & np.isfinite(sds)
         have_mean_only = np.isfinite(shares) & ~np.isfinite(sds)
+
+        # Derive child seeds for sub-function calls
+        seed_beta = int(rng.integers(0, 2**31))
+        seed_dirichlet = int(rng.integers(0, 2**31))
 
         # 1) Components with mean *and* SD  -->  Beta-truncated sampling
         if np.sum(have_both) > 0:
@@ -319,12 +330,13 @@ def hybrid_dirichlet(
                 sds[have_both],
                 fix=True,
                 max_iter=max_iter_beta_sampling,
+                seed=seed_beta,
             )
 
         # 2) Components with mean only --> MaxEnt Dirichlet (rescaled afterwards)
         if np.sum(have_mean_only) > 0:
             alpha2 = shares[have_mean_only] / np.sum(shares[have_mean_only])
-            sample_temp, _ = dirichlet_max_ent(size, alpha2, **kwargs)
+            sample_temp, _ = dirichlet_max_ent(size, alpha2, seed=seed_dirichlet, **kwargs)
             sample[:, have_mean_only] = sample_temp * (
                 1 - sample[:, have_both].sum(axis=1, keepdims=True)
             )
@@ -359,6 +371,7 @@ def sample_dirichlet(
     gamma_par=None,
     threshold_dirichlet=0.01,
     force_nonzero_samples=True,
+    seed=None,
     **kwargs,
 ):
     """
@@ -416,13 +429,15 @@ def sample_dirichlet(
 
     if not force_nonzero_samples:
         print("Using scipy dirichlet!!!!!")
-        return stats.dirichlet.rvs(alpha, size=size)
+        rng = np.random.default_rng(seed)
+        return stats.dirichlet.rvs(alpha, size=size, random_state=rng)
     else:
         l = len(alpha)
         rate = np.ones(l)
         rate[alpha < threshold_dirichlet] = 1 / alpha[alpha < threshold_dirichlet]
         alpha[alpha < threshold_dirichlet] = 1
-        x = gamma.rvs(alpha, scale=1 / rate, size=(size, l))
+        rng = np.random.default_rng(seed)
+        x = gamma.rvs(alpha, scale=1 / rate, size=(size, l), random_state=rng)
         sample = x / x.sum(axis=1, keepdims=True)
         return sample
 
@@ -492,7 +507,7 @@ def check_sample_means_and_sds(
         )
 
 
-def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
+def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3, seed=None):
     """
     Generate random samples from independent Beta distributions with specified means (shares) and standard deviations (sds), ensuring that the sum of samples across columns does not exceed 1 for each row.
 
@@ -537,16 +552,17 @@ def sample_from_beta(n, shares, sds, fix=True, max_iter=1e3):
     alpha = shares * (((shares * (1 - shares)) / var) - 1)
     beta = (1 - shares) * (((shares * (1 - shares)) / var) - 1)
 
+    rng = np.random.default_rng(seed)
     k = len(shares)
     x = np.zeros((n, k))
     for i in range(k):
-        x[:, i] = np.random.beta(alpha[i], beta[i], size=n)
+        x[:, i] = rng.beta(alpha[i], beta[i], size=n)
 
     larger_one = x.sum(axis=1) > 1
     count = 0
     while np.sum(larger_one) > 0:
         for i in range(k):
-            x[larger_one, i] = np.random.beta(
+            x[larger_one, i] = rng.beta(
                 alpha[i], beta[i], size=np.sum(larger_one)
             )
         larger_one = x.sum(axis=1) > 1

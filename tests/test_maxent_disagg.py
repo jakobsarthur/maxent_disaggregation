@@ -100,6 +100,76 @@ def test_sample_shares_partial_means():
     assert np.allclose(sample_means[mask], means[mask], rtol=0.15)
 
 
+# ---- Seed reproducibility tests ----
+
+class TestSeedReproducibility:
+    """Tests that passing a seed produces identical results across calls."""
+
+    def test_sample_aggregate_seed_reproducibility(self):
+        kwargs = dict(n=500, mean=10, sd=2, low_bound=0, high_bound=np.inf, log=True)
+        s1 = sample_aggregate(**kwargs, seed=42)
+        s2 = sample_aggregate(**kwargs, seed=42)
+        np.testing.assert_array_equal(s1, s2)
+
+    def test_sample_aggregate_different_seeds(self):
+        kwargs = dict(n=500, mean=10, sd=2)
+        s1 = sample_aggregate(**kwargs, seed=42)
+        s2 = sample_aggregate(**kwargs, seed=99)
+        assert not np.array_equal(s1, s2)
+
+    def test_sample_aggregate_no_seed_varies(self):
+        kwargs = dict(n=500, mean=10, sd=2)
+        s1 = sample_aggregate(**kwargs, seed=None)
+        s2 = sample_aggregate(**kwargs, seed=None)
+        # Very unlikely (but not impossible) to be equal; practical check
+        assert not np.array_equal(s1, s2)
+
+    def test_sample_aggregate_truncnorm_seed(self):
+        kwargs = dict(n=500, mean=10, sd=2, low_bound=5, high_bound=15, log=False)
+        s1 = sample_aggregate(**kwargs, seed=7)
+        s2 = sample_aggregate(**kwargs, seed=7)
+        np.testing.assert_array_equal(s1, s2)
+
+    def test_sample_shares_seed_reproducibility(self):
+        kwargs = dict(n=500, shares=[0.5, 0.3, 0.2])
+        s1, g1 = sample_shares(**kwargs, seed=42)
+        s2, g2 = sample_shares(**kwargs, seed=42)
+        np.testing.assert_array_equal(s1, s2)
+
+    def test_sample_shares_with_sds_seed(self):
+        kwargs = dict(n=500, shares=[0.6, 0.3, 0.1], sds=[0.05, 0.04, 0.03])
+        s1, _ = sample_shares(**kwargs, seed=123)
+        s2, _ = sample_shares(**kwargs, seed=123)
+        np.testing.assert_array_equal(s1, s2)
+
+    def test_sample_shares_different_seeds(self):
+        kwargs = dict(n=500, shares=[0.5, 0.3, 0.2])
+        s1, _ = sample_shares(**kwargs, seed=42)
+        s2, _ = sample_shares(**kwargs, seed=99)
+        assert not np.array_equal(s1, s2)
+
+    def test_maxent_disagg_seed_reproducibility(self):
+        kwargs = dict(n=500, mean_0=10, shares=[0.5, 0.3, 0.2], sd_0=2)
+        s1, g1 = maxent_disagg(**kwargs, seed=42)
+        s2, g2 = maxent_disagg(**kwargs, seed=42)
+        np.testing.assert_array_equal(s1, s2)
+
+    def test_maxent_disagg_different_seeds(self):
+        kwargs = dict(n=500, mean_0=10, shares=[0.5, 0.3, 0.2], sd_0=2)
+        s1, _ = maxent_disagg(**kwargs, seed=42)
+        s2, _ = maxent_disagg(**kwargs, seed=99)
+        assert not np.array_equal(s1, s2)
+
+    def test_maxent_disagg_with_sds_seed(self):
+        kwargs = dict(
+            n=500, mean_0=10, shares=[0.6, 0.3, 0.1],
+            sd_0=2, sds=[0.05, 0.04, 0.03],
+        )
+        s1, _ = maxent_disagg(**kwargs, seed=7)
+        s2, _ = maxent_disagg(**kwargs, seed=7)
+        np.testing.assert_array_equal(s1, s2)
+
+
 def test_sample_shares_partial_sds():
     n = 1000
     shares = [0.4, 0.3, 0.3]

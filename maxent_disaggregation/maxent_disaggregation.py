@@ -17,6 +17,7 @@ def maxent_disagg(
     return_aggregate: bool = False,
     max_iter: int = 1e3,
     suppress_warnings: bool = False,
+    seed: int = None,
     **kwargs,
 ) -> np.ndarray:
     """
@@ -52,6 +53,8 @@ def maxent_disagg(
     suppress_warnings : bool, optional
         If True, suppress warnings about sample means and standard deviations deviating
         from the specified values. Default is False.
+    seed : int, optional
+        Random seed for reproducibility. Default is None.
 
     Returns
     -------
@@ -105,9 +108,18 @@ def maxent_disagg(
         raise ValueError("mean_0 should be between min_0 and max_0.")
 
 
+    # Derive child seeds for independent sub-calls
+    if seed is not None:
+        rng = np.random.default_rng(seed)
+        seed_agg = int(rng.integers(0, 2**31))
+        seed_shares = int(rng.integers(0, 2**31))
+    else:
+        seed_agg = None
+        seed_shares = None
+
     samples_agg = sample_aggregate(
         n=n, mean=mean_0, sd=sd_0, low_bound=min_0, high_bound=max_0, log=log,
-        suppress_warnings=suppress_warnings,
+        suppress_warnings=suppress_warnings, seed=seed_agg,
     )
     samples_shares, gamma = sample_shares(
         n=n,
@@ -116,6 +128,7 @@ def maxent_disagg(
         grad_based=grad_based,
         max_iter=max_iter,
         suppress_warnings=suppress_warnings,
+        seed=seed_shares,
         **kwargs,
     )
     # Check if the shares sum to 1
