@@ -26,6 +26,9 @@ This package enables you to account for:
 - **Plot the covariance** of the samples
 
 
+## 📚 Citation
+If `maxent_disaggregation` supports your scientific work, please consider citing the following [paper](https://link.springer.com/article/10.1007/s44498-026-00048-6).
+
 
 ## 💬 Support
 If you have any questions or need help, do not hesitate to contact us:
