@@ -116,13 +116,8 @@ plot_covariances(samples)
 ![Covariances of the samples for the disaggregate quantities.](https://github.com/jakobsarthur/maxent_disaggregation/blob/main/docs/content/data/Quickstart_example_covariances.svg)
 
 
-## 📚 Citation
-If `maxent_disaggregation` supports your scientific work, please consider citing the following [paper](https://link.springer.com/article/10.1007/s44498-026-00048-6).
-
-
-
 ## Reference
-If you find this package useful please share and cite our paper: [DOI]
+If you find this package useful please share and cite our [paper](https://link.springer.com/article/10.1007/s44498-026-00048-6).: [DOI: 10.1007/s44498-026-00048-6](https://doi.org/10.1007/s44498-026-00048-6)
 
 ## Contributing
 
