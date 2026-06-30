@@ -32,6 +32,8 @@ requirements:
                 - scipy
                 - matplotlib
                 - nlopt
+                - seaborn
+                - pandas
         
 
 about:
