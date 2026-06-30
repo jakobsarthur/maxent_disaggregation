@@ -21,8 +21,11 @@ jobs:
           fetch-depth: 0
       - uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.12
+          python-version: "3.12"
           auto-activate-base: true
+          miniforge-variant: Miniforge3
+          use-mamba: true
+
       - name: Publish distribution 📦 to conda channels
         if: startsWith(github.ref, 'refs/tags')
         env:
@@ -30,8 +33,8 @@ jobs:
         run: |
           conda info
           conda config --set auto_update_conda False
-          conda install -y -q conda-build anaconda-client conda-index
+          mamba install -y conda-build anaconda-client conda-index
           ls -la
           ls -la conda/
-          conda build ./conda --output-folder ./conda-out
-          anaconda -t $ANACONDA_API_TOKEN upload ./conda-out/*/maxent_disaggregation-*.conda
+          python -m conda_build ./conda --output-folder ./conda-out
+          anaconda -t "$ANACONDA_API_TOKEN" upload ./conda-out/*/maxent_disaggregation-*.conda
