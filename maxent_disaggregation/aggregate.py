@@ -90,6 +90,7 @@ def sample_aggregate(
     ):
         # Exponential
         sample = rng.exponential(scale=mean, size=n)
+        # set sd
     elif (
         mean is None
         and sd is None
@@ -307,14 +308,13 @@ def check_sample_vs_input(
     sample_mean = samples.mean()
     sample_sd = samples.std()
 
-    if not np.isclose(sample_mean, mean, rtol=threshold_shares) and not suppress_warnings:
-        warnings.warn(
-            f"Sample mean {sample_mean:.2f} deviates from input mean {mean:.2f} "
-            f"by more than {threshold_shares*100:.1f}%.\n"
-            f"To suppress this warning, set suppress_warnings=True or increase threshold_shares."
-        )
-
-    if not np.isclose(sample_sd, sd, rtol=threshold_sd) and not suppress_warnings:
+    if not mean is None and not np.isclose(sample_mean, mean, rtol=threshold_shares) and not suppress_warnings:
+            warnings.warn(
+                f"Sample mean {sample_mean:.2f} deviates from input mean {mean:.2f} "
+                f"by more than {threshold_shares*100:.1f}%.\n"
+                f"To suppress this warning, set suppress_warnings=True or increase threshold_shares."
+            )
+    if not sd is None and not np.isclose(sample_sd, sd, rtol=threshold_sd) and not suppress_warnings:
         warnings.warn(
             f"Sample standard deviation {sample_sd:.2f} deviates from input standard deviation {sd:.2f} "
             f"by more than {threshold_sd*100:.1f}%.\n"
