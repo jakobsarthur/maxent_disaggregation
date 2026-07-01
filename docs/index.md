@@ -33,7 +33,7 @@ If `maxent_disaggregation` supports your scientific work, please consider citing
 ## 💬 Support
 If you have any questions or need help, do not hesitate to contact us:
 - Arthur Jakobs ([artos.jakobs@psi.ch](mailto:artos.jakobs@psi.ch))
-- Simon Schulte ([simonsc@plan.aau.dk](mailto:simonsc@plan.aau.dk))
+- Simon Schulte ([simon.schulte@indecol.uni-freiburg.de](mailto:simon.schulte@indecol.uni-freiburg.de))
 
 
 
