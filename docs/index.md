@@ -6,6 +6,13 @@
 partial information of the data is availaible. The package closely follows the ``Maximum Entropy`` principle, 
 to provide unbiased sampling, using all available information. Sounds complicated? The package does the hard work for you! Simply put in the information that you have and sample away!
 
+
+### Installation
+```console
+pip install maxent_disaggregation
+```
+
+
 Check out these docs to:
 
 - Have a [Quick Start](./content/usage.md)
