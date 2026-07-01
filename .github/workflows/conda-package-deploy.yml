@@ -36,5 +36,5 @@ jobs:
           mamba install -y conda-build anaconda-client conda-index
           ls -la
           ls -la conda/
-          conda build ./conda --output-folder ./conda-out
+          conda-build ./conda --output-folder ./conda-out
           anaconda -t "$ANACONDA_API_TOKEN" upload ./conda-out/*/maxent_disaggregation-*.conda
