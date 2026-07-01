@@ -25,6 +25,7 @@ requirements:
                 - numpy
                 - scipy
                 - nlopt
+                - matplotlib
         run:
                 - python>=3.9, <3.14
                 - pip
