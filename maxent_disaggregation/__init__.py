@@ -27,24 +27,31 @@ __all__ = (
 def __getattr__(name):
     if name == "plot_samples_hist":
         try:
-            from .plot_samples_hist import plot_samples_hist
+            from .plot_samples_hist import plot_samples_hist as func
         except ImportError as exc:
             raise ImportError(
                 "plot_samples_hist requires plotting dependencies. "
                 "Install with `pip install matplotlib`."
             ) from exc
 
-        return plot_samples_hist
+        # Importing the submodule sets `plot_samples_hist` on this package's
+        # namespace to the *module*, shadowing this __getattr__ on future
+        # lookups. Overwrite it with the actual function so both attribute
+        # access and `from maxent_disaggregation import plot_samples_hist`
+        # resolve correctly.
+        globals()[name] = func
+        return func
     if name == "plot_covariances":
         try:
-            from .plot_covariances import plot_covariances
+            from .plot_covariances import plot_covariances as func
         except ImportError as exc:
             raise ImportError(
                 "plot_covariances requires plotting dependencies. "
                 "Install with `pip install matplotlib corner`."
             ) from exc
 
-        return plot_covariances
+        globals()[name] = func
+        return func
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
