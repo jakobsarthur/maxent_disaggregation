@@ -9,13 +9,13 @@
 pip install maxent_disaggregation
 ```
 
-2. If you want to run the example notebooks and have the plotting options, run:
+2. If you want to run the example notebooks run:
 ```console
 pip install maxent_disaggregation [notebooks] 
 ```
 
 
-## Installation via `Conda`
+<!-- ## Installation via `Conda`
 
 ### Option 1: Create a new `Conda environment` for you project
 1. Create a new Conda environment (in this example named `maxent_disaggregation`):
@@ -52,4 +52,4 @@ conda install -c jakobs maxent_disaggregation
 ```console
 conda install matplotlib seaborn
 pip install corner
-```
+``` -->

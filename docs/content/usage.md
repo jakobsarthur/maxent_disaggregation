@@ -1,5 +1,14 @@
 # Quickstart
 
+
+## Installation via `pip`
+1. Install maxent_disaggregation:
+```console
+pip install maxent_disaggregation
+```
+
+
+## Use
 After installation use the following example as a way to quickly guide you through the usage of the `maxent_disaggregation` package. For more detailed examples please see [Examples](./examples/index.md)
 
 
